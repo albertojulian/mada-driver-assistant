@@ -1,0 +1,27 @@
+# Ignorar archivos generados por Android Studio
+.idea/
+*.iml
+
+# Ignorar carpetas generadas por Gradle
+.gradle/
+
+# Ignorar directorios de compilación
+build/
+app/build/
+*/build/
+
+# Ignorar capturas de pantalla
+captures/
+
+# Ignorar archivos generados de la máquina
+.DS_Store
+
+# APKs y archivos comprimidos
+*.apk
+*.ap_
+
+# Archivos de configuración local
+local.properties
+
+# Archivo de firma de clave
+*.keystore
