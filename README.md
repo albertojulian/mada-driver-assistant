@@ -24,3 +24,9 @@ There
 
 ## MADA Mac
 `object_detector.py`
+`websocketServ.py`
+`driver_agent.py`
+`memory.py`
+`planner.py`
+`functions_schema.py`: automatically generates function schemas by parsing the function definitions in a given python file
+`mada.yaml`: contains the configuration parameters
