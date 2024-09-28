@@ -1,5 +1,7 @@
 # Basic Multimodal Agentic Driver Assistant (MADA)
 
+The goal is having a driver assistant as complete as possible with only a few elements:
+
 The only output is speech audio warnings or suggestions.
 
 Next figure shows the functional blocks of MADA.
@@ -10,12 +12,12 @@ There are several sensors and processing modules:
 - a **camera** that takes RGB and depth images. They are processed by the **Object Detector** in the computer, which detects objects (cars, traffic lights) and provides the object class, the bounding box and the position, along with the mean distance from the camera
 - a **cell phone** that gets the **speed** from the GPS and sends it to the computer. It also **recognizes driver speech requests** and sends them as text to the computer. Moreover, the coordinates from the **accelerometer** and **gyroscope** are gathered and sent to the computer
 
+<img src="readme_files/driver_agent.png" alt="Driver Agent structure" width="500" height="350" />
+
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
 to be stored in the Memory and analyzed in the Planner to assess if some action should be initiated. There are two types of actions:
 - **automatic actions**: respond to one or more events that reflect some danger or warning. An example can be detecting that the distance to a car in front is lower than the safety distance.
 - **request motivated actions**: respond to a speech request from the driver. An example could be checking if there is a safety distance with a bus in front. Those requests are sent to an LLM in the Planner which can select a function to be called.
-
-
 
 ## Code structure
 The code is divided in two folders:
@@ -24,7 +26,7 @@ The code is divided in two folders:
 
 ## MADA Android
 There are two apps: 
-- **SpeedVoice**: gets the speed from the GPS and sends 
+- **SpeedVoice**: gets the speed from the GPS and sends it as a webSocket message to the webSockets server in the computer.
 - **AccelGyro**: 
 
 ## MADA Mac
