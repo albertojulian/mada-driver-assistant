@@ -24,16 +24,19 @@ The code is divided in two folders:
 
 ## MADA Android
 There are two apps: 
+- **SpeedVoice**: gets the speed from the GPS and sends 
+- **AccelGyro**: 
 
 ## MADA Mac
-- `object_detector.py`: 
-- `websocketServ.py`: receives websocket messages from the processing modules and converts them into events to be processed 
+- `object_detector.py`: realsense, point-cloud, YOLO, Ultralytics tracker
+- `websocketServ.py`: implements a webSockets server that receives websocket messages from the processing modules (apps in the cell phone and object detector in the computer) and converts them into events to be processed 
 - `driver_agent.py`
 - `memory.py`: contains all class definitions to support the persistence of objects and events:
   - Memory
   - Object
   - SpaceEvent
   - SpeedEvent
+  - ActionEvent: mainly used to avoid repeating the same action over the same object too soon 
 - `planner.py`
 - `functions_schema.py`: automatically generates function schemas by parsing the function definitions in a given python file. The schemas are used by the LLM in the Driver Agent's Planner to decide if a given function must be called. It also contains a FunctionParser class used by the Driver Agent's Planner to parse the JSON output of the LLM in function calling mode and ensure the function exists and is correctly called
 - `mada.yaml`: contains the configuration parameters
