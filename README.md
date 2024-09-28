@@ -13,10 +13,12 @@ Next figure shows the functional blocks of MADA.
 
 There are several sensors and processing modules:
 - a **camera** that takes RGB and depth images. They are processed by the **Object Detector** in the computer, which detects objects (cars, traffic lights) and provides the object class, the bounding box and the position, along with the mean distance from the camera
-- a **cell phone** that gets the **speed** from the GPS and sends it to the computer. It also **recognizes driver speech requests** and sends them as text to the computer. Moreover, the coordinates from the **accelerometer** and **gyroscope** are gathered and sent to the computer
+- a **cell phone** that gets the **speed** from the GPS, **recognizes driver speech requests** and sends them as text to the computer, gets the coordinates from the **accelerometer** and **gyroscope**, and sends al this data to the computer. On the other hand, the cell phone **provides wi-fi** to the computer.
 
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
 to be stored in the Memory and analyzed in the Planner to assess if some action should be initiated.
+
+Next figure shows the Driver Agent structure.
 
 <img src="readme_files/driver_agent.png" alt="Driver Agent structure" width="500" height="350" />
 
@@ -29,12 +31,12 @@ The code is divided in two folders:
 - **mada_android**: contains two project folders for two apps to be built in Android Studio and installed in an Android cell phone
 - **mada_mac**: contains python files implementing the Driver Agent modules that run on a computer (a Mac M1, currently)
 
-## MADA Android
+### MADA Android
 There are two apps: 
 - **SpeedVoice**: gets the speed from the GPS and sends it as a webSocket message to the webSockets server in the computer.
 - **AccelGyro**: 
 
-## MADA Mac
+### MADA Mac
 - `object_detector.py`: realsense, point-cloud, YOLO, Ultralytics tracker
 - `websocketServ.py`: implements a webSockets server that receives websocket messages from the processing modules (apps in the cell phone and object detector in the computer) and converts them into events to be processed 
 - `driver_agent.py`
@@ -47,3 +49,13 @@ There are two apps:
 - `planner.py`
 - `functions_schema.py`: automatically generates function schemas by parsing the function definitions in a given python file. The schemas are used by the LLM in the Driver Agent's Planner to decide if a given function must be called. It also contains a FunctionParser class used by the Driver Agent's Planner to parse the JSON output of the LLM in function calling mode and ensure the function exists and is correctly called
 - `mada.yaml`: contains the configuration parameters
+
+## Execution instructions
+- Connect the camera to the computer
+- In the Cell Phone: turn on GPS and Shared Connection
+- In the Computer:
+  - link to the cell phone wi-fi
+  - enter the virtual environment with MADA packages
+  - Run the websockets server (which starts the Driver Agent): `python websocketServ.py`
+  - Run the object detector: `sudo python object_detector.py`
+- In the Cell Phone: start the SpeedVoice and AccelGyro apps
