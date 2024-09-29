@@ -20,7 +20,7 @@ with open(mada_file) as file:
 
 
 # Original voices are slow => increase with audio_speed=1.75 as the -r parameter in afplay
-def say_message(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
+def say_message2(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
 
     if print_message:
         print("\n<<<<<<<<<<< Start printing audio message: ")
@@ -91,28 +91,16 @@ def wifi_info_mac():
             return ssid
 
 
-def is_float(s):
+def is_float(str):
     try:
-        float(s)
+        float(str)
         return 1
     except ValueError:
         return 0
 
 
+
 def main1():
-    start_time = time()
-    message = "Your"  # speed is 70 kilometers per hour, but limit is 90. You can increase speed
-    for _ in range(10):
-        say_message(message)
-
-    end_time = time()
-    process_time = end_time - start_time
-    print(round(process_time, 2))
-
-    # 10 repeticiones de una palabra tardan 21.95s de mimic3 (local) y 12 de gtts (internet por móvil)
-
-
-def main2():
     video_name = "rgb_4.mp4"  # 1280x720; 266 frames
     in_video_path = os.path.join("./videos", video_name)
 
@@ -122,7 +110,7 @@ def main2():
     print(fps, "fps")
 
 
-def main3():
+def main2():
     file = "../Small Language Models AJR/0 traffic docs/dh-chapter3.pdf"
 
     # drive1_txt = read_pdf_v1(file)
@@ -131,23 +119,14 @@ def main3():
     pdf2txt(file)
 
 
-def main4():
+def main3():
     ssid = wifi_info_mac()
     print(f"Conectado a la red WiFi: {ssid}")
 
-
-def create_gtts_connection_error_audio():
-    message = "gtts connection error. Check if the Mac is connected to internet"
-    gtts_ok = say_message(message)
-    if gtts_ok:
-        import shutil
-        shutil.copy("tts_out.mp3", "gtts_connection_error.mp3")
 
 
 if __name__ == "__main__":
 
     # main1()
     # main2()
-    # main3()
-    # main4()
-    create_gtts_connection_error_audio()
+    main3()

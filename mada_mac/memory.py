@@ -1,5 +1,7 @@
 from time import time
 from utils import is_float
+from text_to_speech import text_to_speech
+
 
 class Memory:
 
@@ -77,6 +79,20 @@ class Memory:
         if log:
             print(f"Creating gyro event")
 
+
+
+        umbral = 0.1
+        message = ""
+        z = gyro_coords[2]
+        if z > umbral:
+            message = "Turning right"
+        elif z < -umbral:
+            message = "Turning left"
+
+        text_to_speech(message)
+
+
+
     def add_text_input_message(self, text_input_message, log=False):
         text_input_message_event = SpeechToTextEvent(text_input_message, self.init_time)
         self.text_input_messages.append(text_input_message_event)
@@ -88,6 +104,27 @@ class Memory:
     def add_action_event(self, params, output_message, log=False):
         object, is_new_object = self.get_object(params, log=log)
         object.add_action_event(params, output_message, log=log)
+
+    def print_content(self, extended_log=False):
+
+        print(f"\nMemory contains:")
+        print(f"- {len(self.objects_list)} objects")
+        print(f"- {len(self.speed_events)} speed events")
+        print(f"- {len(self.accel_events)} accelerometer events")
+        print(f"- {len(self.gyro_events)} gyroscope events")
+        print(f"- {len(self.text_input_messages)} text input messages\n")
+
+        if extended_log:
+            for object in self.objects_list:
+                lifetime = round(object.get_lifetime(), 1)
+                print(f'Object with id {object.track_id} has been alive for {lifetime} seconds')
+
+            for speed_event in self.speed_events:
+                event_time = round(speed_event.creation_time, 1)
+                print(f'Speed of {speed_event.speed} km/h at time {event_time}')
+
+            for text_input_message in self.text_input_messages:
+                print(f"Received input message: {text_input_message}")
 
 
 class Object:
@@ -133,6 +170,9 @@ class Object:
         current_time = time() - self.init_time
 
         return current_time - self.action_events[-1].creation_time
+
+    def print_content(self):
+        pass
 
 
 class Event:

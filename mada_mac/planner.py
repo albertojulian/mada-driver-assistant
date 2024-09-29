@@ -5,6 +5,12 @@ import driver_agent
 from functions_schema import gather_functions_schema, FunctionCallParser
 import os
 
+
+# TODO: think a two step process that needs the LLM to 1) call a function and
+#  2a) use the result to call another function
+#  or 2b) ask the driver to provide more info
+
+
 mada_file = "mada.yaml"
 with open(mada_file) as file:
     mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)

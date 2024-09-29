@@ -14,7 +14,7 @@ import torch
 import websockets
 import asyncio
 import yaml
-from utils import say_message
+from text_to_speech import text_to_speech
 
 
 async def space_events():
@@ -188,7 +188,7 @@ async def space_events():
 
             except Exception as e:
                 connection_error = mada_config_dict.get("object_detector_connection_error", "Object Detector connection error")
-                say_message(connection_error)
+                text_to_speech(connection_error)
                 break
 
     finally:

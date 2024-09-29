@@ -5,15 +5,15 @@ The goal is having a driver assistant as complete as possible with the following
 - a cell phone: Samsung
 - a computer: Apple M1 with just 8 GB of RAM
 
-The only output is speech audio warnings or suggestions.
+The only outputs are speech audio warnings or suggestions.
 
 Next figure shows the functional blocks of MADA.
 
 <img src="readme_files/esquema MADA.png" alt="MADA functional blocks" width="900" height="500" />
 
 There are several sensors and processing modules:
-- a **camera** that takes RGB and depth images. They are processed by the **Object Detector** in the computer, which detects objects (cars, traffic lights) and provides the object class, the bounding box and the position, along with the mean distance from the camera
-- a **cell phone** that gets the **speed** from the GPS, **recognizes driver speech requests** and sends them as text to the computer, gets the coordinates from the **accelerometer** and **gyroscope**, and sends al this data to the computer. On the other hand, the cell phone **provides wi-fi** to the computer.
+- the **camera** takes RGB and depth images. They are processed by the **Object Detector** in the computer, which detects objects (cars, traffic lights) and provides the object class, the bounding box and the position, along with the mean distance from the camera
+- the **cell phone** gets the **speed** from the GPS, **recognizes driver speech requests**, gets the coordinates from the **accelerometer** and **gyroscope**, and sends al this data to the computer. On the other hand, the cell phone **provides wi-fi** to the computer.
 
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
 to be stored in the Memory and analyzed in the Planner to assess if some action should be initiated.

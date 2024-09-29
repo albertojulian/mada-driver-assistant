@@ -1,7 +1,7 @@
-from utils import say_message
 import threading
 from memory import Memory
 from planner import Planner
+from text_to_speech import text_to_speech
 from ast import literal_eval
 import yaml
 from typing import Literal
@@ -10,7 +10,6 @@ from time import time
 # Executing a function inside a string: 'check_safety_distance_from_vehicle_v0(vehicle_type="car", position="in front")'
 # - Use eval() to execute the function if it's a simple expression,
 # - or exec() if it's a statement or requires more flexibility.
-
 
 mada_file = "mada.yaml"
 with open(mada_file) as file:
@@ -77,7 +76,7 @@ class DriverAgent:
                 self.memory.add_action_event(params, output_message)
 
                 if self.memory.listen_mode is False:
-                    audio_thread = threading.Thread(target=say_message, args=(output_message,))
+                    audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
                     # Start audio in a separate thread
                     audio_thread.start()
         # elif class_name in [speed_limit, ...]
@@ -95,7 +94,7 @@ class DriverAgent:
         if parsing_ok:
             eval(response)
         else:
-            say_message(response)
+            text_to_speech(response)
 
 
 _driver_agent_instance = None
@@ -150,7 +149,7 @@ def check_safety_distance_from_vehicle_v0(vehicle_type: Literal["car", "bus"],
     if log:
         print(f"[ACTION] Output message: {output_message}")
 
-    say_message(output_message)
+    text_to_speech(output_message)
 
 
 def check_safety_distance_from_vehicle(vehicle=None, space_event=None, report_always: bool = True):
@@ -163,7 +162,7 @@ def check_safety_distance_from_vehicle(vehicle=None, space_event=None, report_al
         if vehicle is None or space_event is None:
             vehicle_types_str = " nor ".join(vehicle_types)
             output_message = f"There is no {vehicle_types_str} {position}"
-            say_message(output_message)
+            text_to_speech(output_message)
             return
 
     # Vehicle is not None and space_event is not None
@@ -191,10 +190,10 @@ def check_safety_distance_from_vehicle(vehicle=None, space_event=None, report_al
 
     if report_always:  # execute from stt => llm => function calling
         print(f"[ACTION] Output message: {output_message}")
-        say_message(output_message)
+        text_to_speech(output_message)
     elif too_close is True:
         print(f"[ACTION] Output message: {output_message}")
-        audio_thread = threading.Thread(target=say_message, args=(output_message,))
+        audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
         # Start audio in a separate thread
         audio_thread.start()
 
@@ -236,7 +235,7 @@ def get_current_speed(tts=True):
 
     if tts:
         output_message = f"Your speed is {current_speed_str}."
-        say_message(output_message)
+        text_to_speech(output_message)
 
     return current_speed, current_speed_str
 

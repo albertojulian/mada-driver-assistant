@@ -11,9 +11,9 @@
 # instalo websockets por PyCharm (equivale a pip install websockets)
 import asyncio
 import websockets
-from memory_test import memory_reading_test
 from driver_agent import get_driver_agent
-from utils import say_message, wifi_info_mac
+from utils import wifi_info_mac
+from text_to_speech import text_to_speech
 import yaml
 from time import time
 
@@ -28,7 +28,7 @@ def check_mac_wifi_connection():
         mac_not_connected_and_phone_app = mada_config_dict.get("mac_not_connected_and_phone_app", "Connection with phone not OK")
         message = mac_not_connected_and_phone_app
 
-    say_message(message)
+    text_to_speech(message)
 
 
 async def handle_events(websocket, path):
@@ -42,7 +42,7 @@ async def handle_events(websocket, path):
                 print(f"Message received: {message}")
 
             if message == phone_connected:
-                say_message(phone_connected_start_object_detector)
+                text_to_speech(phone_connected_start_object_detector)
 
             elif message.split()[0] == "setSpaceEvent":
                 # print("Space event received")
@@ -53,7 +53,7 @@ async def handle_events(websocket, path):
                 text_input_message = " ".join(message.split()[1:])
                 if text_input_message == "listen":
                     driver_agent.memory.listen_mode = True
-                    say_message(listening_ack, print_message=False)
+                    text_to_speech(listening_ack, print_message=False)
 
                 # elif input_message == "stop":
                 #     driver_agent.memory.listen_mode = False  # enables proactive actions
@@ -77,10 +77,10 @@ async def handle_events(websocket, path):
 
             current_time = time()
             duration = current_time - init_time
-            interval = round(duration % 5, 1)
-
+            interval = round(duration % 5, 1)  # print memory content every 5 seconds
             if interval == 0.0:
-                memory_reading_test()
+                # memory_reading_test()
+                driver_agent.memory.print_content()
 
     except websockets.exceptions.ConnectionClosedError as e:
         print(f"Client webSocket connection closed")
