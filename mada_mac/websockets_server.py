@@ -2,7 +2,7 @@
 # ORDEN:
 # - Activar GPS y Conexion compartida (AndroidAJR) en el móvil
 # - conectar WiFi Mac a AndroidAJR
-# - ejecutar: wss (python websocketServ.py)
+# - ejecutar: wss (python websockets_server.py)
 # - ejecutar app móvil SpeedVoiceWebSocket
 # - ejecutar: od (sudo python "object_detector.py")
 

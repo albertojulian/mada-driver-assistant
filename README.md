@@ -37,8 +37,9 @@ There are two apps:
 - **AccelGyro**: 
 
 ### MADA Mac
+Contains the following files:
 - `object_detector.py`: realsense, point-cloud, YOLO, Ultralytics tracker
-- `websocketServ.py`: implements a webSockets server that receives websocket messages from the processing modules (apps in the cell phone and object detector in the computer) and converts them into events to be processed 
+- `websockets_server.py`: implements a webSockets server that receives websocket messages from the processing modules (apps in the cell phone and object detector in the computer) and converts them into events to be processed 
 - `driver_agent.py`
 - `memory.py`: contains all class definitions to support the persistence of objects and events:
   - Memory: container of objects and events
@@ -48,7 +49,11 @@ There are two apps:
   - ActionEvent: mainly used to avoid repeating the same action over the same object too soon 
 - `planner.py`
 - `functions_schema.py`: automatically generates function schemas by parsing the function definitions in a given python file. The schemas are used by the LLM in the Driver Agent's Planner to decide if a given function must be called. It also contains a FunctionParser class used by the Driver Agent's Planner to parse the JSON output of the LLM in function calling mode and ensure the function exists and is correctly called
+- `text_to_speech.py`: manages the text-to-speech functionality, currently very simple: 
+  - a call to Google's gtts service, which takes a text and delivers an audio file of the spoken text
+  - a call to MacOS `afplay` command, which takes an audio file and plays it
 - `mada.yaml`: contains the configuration parameters
+- ``
 
 ## Execution instructions
 - Connect the camera to the computer
@@ -56,6 +61,6 @@ There are two apps:
 - In the Computer:
   - link to the cell phone wi-fi
   - enter the virtual environment with MADA packages
-  - Run the websockets server (which starts the Driver Agent): `python websocketServ.py`
+  - Run the websockets server (which starts the Driver Agent): `python websocket_server.py`
   - Run the object detector: `sudo python object_detector.py`
 - In the Cell Phone: start the SpeedVoice and AccelGyro apps
