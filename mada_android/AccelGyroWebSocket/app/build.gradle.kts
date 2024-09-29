@@ -47,6 +47,4 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
-
-    implementation("com.google.android.gms:play-services-location:17.0.0")
 }

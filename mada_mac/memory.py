@@ -118,6 +118,7 @@ class Memory:
             for object in self.objects_list:
                 lifetime = round(object.get_lifetime(), 1)
                 print(f'Object with id {object.track_id} has been alive for {lifetime} seconds')
+                # TODO: implement and call object.print_content()
 
             for speed_event in self.speed_events:
                 event_time = round(speed_event.creation_time, 1)
@@ -172,6 +173,7 @@ class Object:
         return current_time - self.action_events[-1].creation_time
 
     def print_content(self):
+        # TODO: implement
         pass
 
 

@@ -59,25 +59,7 @@ def memory_reading_test(extended_log=False):
 
     driver_agent = get_driver_agent()
     memory = driver_agent.memory
-
-    print(f"\nMemory has:")
-    print(f"- {len(memory.objects_list)} objects")
-    print(f"- {len(memory.speed_events)} speed events")
-    print(f"- {len(memory.accel_events)} accelerometer events")
-    print(f"- {len(memory.gyro_events)} gyroscope events")
-    print(f"- {len(memory.text_input_messages)} text input messages\n")
-
-    if extended_log:
-        for object in memory.objects_list:
-            lifetime = round(object.get_lifetime(), 1)
-            print(f'Object with id {object.track_id} has been alive for {lifetime} seconds')
-
-        for speed_event in memory.speed_events:
-            event_time = round(speed_event.creation_time, 1)
-            print(f'Speed of {speed_event.speed} km/h at time {event_time}')
-
-        for text_input_message in memory.text_input_messages:
-            print(f"Received input message: {text_input_message}")
+    memory.print_content(extended_log)
 
 
 def main1():

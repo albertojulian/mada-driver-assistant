@@ -2,13 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
+    <!--uses-permission android:name="android.permission.INTERNET" enables websocket connection to computer ws server /-->
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Nuevo para reconocer voz /-->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!--android:usesCleartextTraffic="true" permite conectar WebSockets con servidor; en otros casos mejor wss => certificado en servidor /-->
     <application

@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        val macURL = "ws://" + serverIP + ":$serverPort"
+        val macURL = "ws://$serverIP:$serverPort"
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
