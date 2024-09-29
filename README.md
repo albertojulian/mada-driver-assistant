@@ -13,7 +13,7 @@ Next figure shows the functional blocks of MADA.
 
 There are several sensors and processing modules:
 - the **camera** takes RGB and depth images. They are processed by the **Object Detector** in the computer, which detects objects (cars, traffic lights) and provides the object class, the bounding box and the position, along with the mean distance from the camera
-- the **cell phone** gets the **speed** from the GPS, **recognizes driver speech requests**, gets the coordinates from the **accelerometer** and **gyroscope**, and sends al this data to the computer. On the other hand, the cell phone **provides wi-fi** to the computer.
+- the **cell phone** gets the **speed** from the GPS, **recognizes driver speech requests**, gets the coordinates from the **accelerometer** and **gyroscope**, and sends all this data to the computer. On the other hand, the cell phone **provides wi-fi** to the computer.
 
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
 to be stored in the Memory and analyzed in the Planner to assess if some action should be initiated.
@@ -33,8 +33,8 @@ The code is divided in two folders:
 
 ### MADA Android
 There are two apps: 
-- **SpeedVoice**: gets the speed from the GPS and sends it as a webSocket message to the webSockets server in the computer.
-- **AccelGyro**: 
+- **SpeedVoice**: gets the speed from the GPS and transforms the driver speech requests into text; then sends that data as webSocket messages to the webSockets server in the computer.
+- **AccelGyro**: gets the coordinates from the **accelerometer** and **gyroscope**, and sends them as webSockets messages to the webSockets server in the computer
 
 ### MADA Mac
 Contains the following files:
@@ -53,7 +53,7 @@ Contains the following files:
   - a call to Google's gtts service, which takes a text and delivers an audio file of the spoken text
   - a call to MacOS `afplay` command, which takes an audio file and plays it
 - `mada.yaml`: contains the configuration parameters
-- ``
+- `record_rgb_and_depth_videos.py`: records RGB and depth videos to support changes in the object detector indoor without having to connect the camera.
 
 ## Execution instructions
 - Connect the camera to the computer
