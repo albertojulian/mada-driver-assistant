@@ -32,7 +32,7 @@ The code is divided in two folders:
 - **mada_mac**: contains python files implementing the Driver Agent modules that run on a computer (a Mac M1, currently)
 
 ### MADA Android
-There are two apps: 
+There are two Kotlin apps for the Android phone: 
 - **SpeedVoice**: gets the speed from the GPS and transforms the driver speech requests into text; then sends that data as webSocket messages to the webSockets server in the computer.
 - **AccelGyro**: gets the coordinates from the **accelerometer** and **gyroscope**, and sends them as webSockets messages to the webSockets server in the computer
 
@@ -60,7 +60,6 @@ Contains the following files:
 - In the Cell Phone: turn on GPS and Shared Connection
 - In the Computer:
   - link to the cell phone wi-fi
-  - enter the virtual environment with MADA packages
-  - Run the websockets server (which starts the Driver Agent): `python websocket_server.py`
-  - Run the object detector: `sudo python object_detector.py`
+  - open a terminal, enter the virtual environment with the MADA packages and run the websockets server (which starts the Driver Agent): `python websocket_server.py`
+  - open another terminal, enter the virtual environment with the MADA packages and run the object detector: `sudo python object_detector.py`
 - In the Cell Phone: start the SpeedVoice and AccelGyro apps
