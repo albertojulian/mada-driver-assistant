@@ -20,7 +20,7 @@ to be stored in the Memory and analyzed in the Planner to assess if some action 
 
 Next figure shows the Driver Agent structure.
 
-<img src="readme_files/driver_agent.png" alt="Driver Agent structure" width="500" height="350" />
+<img src="readme_files/driver_agent.png" alt="Driver Agent structure" width="900" height="500" />
 
  There are two types of actions:
 - **automatic actions**: respond to one or more events that reflect some danger or warning. An example can be detecting that the distance to a car in front is lower than the safety distance.
