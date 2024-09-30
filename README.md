@@ -85,7 +85,6 @@ Contains the following python files:
 - `driver_agent.py`: implements the DriverAgent class, which contains the Memory and Planner classes; implements the Planner class, which manages the LLM that supports the **driver request motivated actions**; it also performs the evaluation of both automatic and request motivated actions
 - `memory.py`: contains all class definitions to support the persistence of objects and events
 - `functions.py`: includes the definition of the functions supporting the actions
-- `planner.py`: 
 - `functions_schema.py`: automatically generates function schemas by parsing the function definitions in `functions.py`. The schemas are used by the LLM in the Driver Agent's Planner to decide if one of the existing functions must be called. It also contains a FunctionParser class used by the Driver Agent's Planner to parse the JSON output of the LLM in function calling mode and ensure the function exists and is correctly called
 - `text_to_speech.py`: manages the text-to-speech functionality, currently very simple: 
   - a call to Google's gtts service, which takes a text and delivers an audio file of the spoken text
