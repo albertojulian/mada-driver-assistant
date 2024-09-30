@@ -1,10 +1,11 @@
 from driver_agent import get_driver_agent, check_safety_distance_from_vehicle_v0
+from memory import get_memory
 from time import time, sleep
 
 
 def memory_writing_test(log=True, add_delay=False):
-    driver_agent = get_driver_agent(log=log)
-    memory = driver_agent.memory
+
+    memory = get_memory(log=log)
 
     image_width = 680
     image_height = 480
@@ -57,8 +58,7 @@ def memory_writing_test(log=True, add_delay=False):
 
 def memory_reading_test(extended_log=False):
 
-    driver_agent = get_driver_agent()
-    memory = driver_agent.memory
+    memory = memory = get_memory()
     memory.print_content(extended_log)
 
 

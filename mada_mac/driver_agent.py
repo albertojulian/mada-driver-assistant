@@ -1,11 +1,15 @@
-import threading
-from memory import Memory
-from planner import Planner
-from text_to_speech import text_to_speech
+from memory import get_memory
+# from planner import Planner
+from mlx_lm import load, generate
+import ollama
+from functions_schema import gather_functions_schema, FunctionCallParser
+import os
 from ast import literal_eval
 import yaml
-from typing import Literal
 from time import time
+import functions
+from functions import *
+from text_to_speech import text_to_speech
 
 # Executing a function inside a string: 'check_safety_distance_from_vehicle_v0(vehicle_type="car", position="in front")'
 # - Use eval() to execute the function if it's a simple expression,
@@ -22,10 +26,12 @@ TIME_BETWEEN_ACTIONS = mada_config_dict.get("time_between_actions", 2)
 class DriverAgent:
 
     def __init__(self):
-        self.memory = Memory()
+        self.memory = get_memory()
         self.planner = Planner()
 
-    def assess_automatic_action(self, params_str, log=False):
+        print("\n<<<<<<<<<<<< Starting Driver Agent >>>>>>>>>>>>")
+
+    def evaluate_automatic_action(self, params_str, log=False):
         """
 
         :param params_str
@@ -81,7 +87,7 @@ class DriverAgent:
         # elif class_name in [speed_limit, ...]
         # TODO: a speed limit should be reported only once, but a traffic light more times
 
-    def assess_request_action(self, text_input_message, log=True):
+    def evaluate_action_from_request(self, text_input_message, log=True):
 
         text_input_message_event = self.memory.add_text_input_message(text_input_message, log=log)
 
@@ -104,7 +110,6 @@ def get_driver_agent(log=False):
     global _driver_agent_instance
     if _driver_agent_instance is None:
         _driver_agent_instance = DriverAgent()
-        print("\n<<<<<<<<<<<< Starting Driver Agent >>>>>>>>>>>>")
     else:
         if log:
             print("Driver Agent already exists")
@@ -112,157 +117,63 @@ def get_driver_agent(log=False):
     return _driver_agent_instance
 
 
-def check_safety_distance_from_vehicle_v0(vehicle_type: Literal["car", "bus"],
-                                          position: Literal["on the left", "in front", "on the right"],
-                                          log: bool = False):
-    """
+class Planner:
 
-    :param vehicle_type: car, bus
-    :param position: on the left, in front, on the right
-    :param log
-    :return:
-    """
+    # TODO: think a two step process that needs the LLM to 1) call a function and
+    #  2a) use the result to call another function
+    #  or 2b) ask the driver to provide more info
 
-    vehicle, space_event = get_vehicle_instance([vehicle_type], position)
-    if vehicle is not None and space_event is not None:
+    def __init__(self):
 
-        vehicle_distance = space_event.object_distance
+        print("\n<<<<<<<<<<<< Starting Planner >>>>>>>>>>>>")
 
-        max_distance = mada_config_dict.get("max_distance_from_camera", 6)
-        if vehicle_distance > max_distance:
-            output_message = f"{vehicle_type} {position} is more than {max_distance} meters away, which is the camera limit."
+        self.llm_type = mada_config_dict.get("llm_type", "mlx")
+
+        if self.llm_type == "mlx":
+            mlx_llm = mada_config_dict.get("mlx_llm", "mlx-community/gemma-2-2b-it-8bit")
+            self.llm_model, self.llm_tokenizer = load(mlx_llm)
+            # Avoid a HuggingFace tokenizer warning: "huggingface/tokenizers: The current process just got forked ...
+            # ... Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)"
+            os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+        functions_list = ["check_safety_distance_from_vehicle", "get_current_speed"]
+
+        self.functions_schemas = gather_functions_schema(functions, functions_list)
+        functions_schemas_str = str(self.functions_schemas)
+
+        self.prompt_ini = """
+            You are a helpful car driver assistant that takes a question and finds the most appropriate function to execute, along with the parameters required to run the function.
+            Respond as JSON using the following schema: {"function_name": "function name", "parameters": [{"parameter_name": "name of parameter", "parameter_value": "value of parameter"}]}.
+            The definition of functions and parameters is: """ + functions_schemas_str + ". "
+
+        # If a parameter definition has the key "allowed_values", the value of the "parameter_value" key should be the allowed value most consistent with the question.
+
+
+    def generate_response(self, input_message):
+
+        prompt = self.prompt_ini + input_message
+        message = [{'role': 'user', 'content': prompt}]
+
+        if self.llm_type == "mlx":
+            chat_prompt = self.llm_tokenizer.apply_chat_template(message, tokenize=False)
+            llm_response = generate(self.llm_model, self.llm_tokenizer, prompt=chat_prompt, verbose=False)
         else:
-            current_speed, current_speed_str = get_current_speed(tts=False)
-            output_message = f"There is a {vehicle_type} {position} at {vehicle_distance} meters"
+            # ollama
+            ollama_llm = mada_config_dict.get("ollama_llm", "gemma2:2b")
+            llm_response = ollama.chat(model=ollama_llm, messages=message)
+            llm_response = llm_response['message']['content']
 
-            if current_speed is None:
-                output_message += f", but your speed is unknown and thus safety distance cannot be calculated."
-            else:
-                safety_distance = get_safety_distance(current_speed)
-                if vehicle_distance < safety_distance:
-                    output_message = f"You should reduce the speed. {output_message}, but safety distance is bigger: {safety_distance} meters."
-                else:
-                    output_message += f"You can keep the speed. {output_message}, and safety distance is smaller: {safety_distance} meters."
-    else:
-        output_message = f"There is no {vehicle_type} {position}"
+        print("\n<<<<<<<<<<< Start of LLM Response: ")
+        print(llm_response)
+        print(">>>>>>>>>>> End of LLM Response\n")
 
-    if log:
-        print(f"[ACTION] Output message: {output_message}")
+        function_call_parser = FunctionCallParser(self.functions_schemas, llm_response)
+        # TODO: si no hay función, contesta a lo loco
+        parsing_ok, function_call_str = function_call_parser.parse_function_call()
 
-    text_to_speech(output_message)
-
-
-def check_safety_distance_from_vehicle(vehicle=None, space_event=None, report_always: bool = True):
-    position = "in front"
-    too_close = False
-    if vehicle is None:  # executed from stt => llm => function calling
-        vehicle_types = ["car", "bus"]
-
-        vehicle, space_event = get_vehicle_instance(vehicle_types, position)
-        if vehicle is None or space_event is None:
-            vehicle_types_str = " nor ".join(vehicle_types)
-            output_message = f"There is no {vehicle_types_str} {position}"
-            text_to_speech(output_message)
-            return
-
-    # Vehicle is not None and space_event is not None
-    vehicle_type = vehicle.class_name
-
-    vehicle_distance = space_event.object_distance
-
-    max_distance = mada_config_dict.get("max_distance_from_camera", 6)
-    if vehicle_distance > max_distance:
-        output_message = f"{vehicle_type} {position} is more than {max_distance} meters away, which is the camera limit"
-    else:
-        current_speed, current_speed_str = get_current_speed(tts=False)
-        output_message = f"{vehicle_type} {position} at {vehicle_distance} meters"
-
-        if current_speed is None:
-            output_message += f", but your speed is unknown and thus safety distance cannot be calculated."
-        else:
-            safety_distance = get_safety_distance(current_speed)
-
-            if vehicle_distance < safety_distance and current_speed > 0:
-                output_message = f"Reduce the speed. {output_message}, but safety distance is {safety_distance} meters."
-                too_close = True
-            else:
-                output_message += f"You can keep the speed. {output_message}, and safety distance is {safety_distance} meters."
-
-    if report_always:  # execute from stt => llm => function calling
-        print(f"[ACTION] Output message: {output_message}")
-        text_to_speech(output_message)
-    elif too_close is True:
-        print(f"[ACTION] Output message: {output_message}")
-        audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
-        # Start audio in a separate thread
-        audio_thread.start()
-
-    return too_close, output_message
-
-
-def get_vehicle_instance(vehicle_types, position):
-    # TODO: debe considerarse una ventana entre dos momentos:
-    # - cuando se detecta el mensaje de entrada (el llm tarda varios segundos en procesar)
-    # - unos segundos antes
-    """
-    returns most recent vehicle at a given position
-    :param vehicle_types:
-    :param position:
-    :return:
-    """
-    driver_agent = get_driver_agent()
-    memory = driver_agent.memory
-    # objects_list is browsed in reverse order: from most recent
-    for object in memory.objects_list[::-1]:
-        if object.class_name in vehicle_types:
-            # space event list is browsed in reverse order: from most recent
-            for space_event in object.space_events[::-1]:
-                if space_event.object_position == position:
-                    return object, space_event
-    return None, None
-
-
-def get_current_speed(tts=True):
-    driver_agent = get_driver_agent()
-    memory = driver_agent.memory
-
-    if len(memory.speed_events) == 0:
-        current_speed = None
-        current_speed_str = "unknown"
-    else:
-        current_speed = memory.speed_events[-1].speed
-        current_speed_str = f"{current_speed} km/h"
-
-    if tts:
-        output_message = f"Your speed is {current_speed_str}."
-        text_to_speech(output_message)
-
-    return current_speed, current_speed_str
-
-
-def get_safety_distance(current_speed, safety_time=2, min_distance=2):
-    """
-
-    :param current_speed: km/h
-    :param safety_time: in seconds; should depend on weather conditions: greater with rain
-    :param min_distance: m; if current_speed == 0 or very low, distance should be 2m at least (there is 1m from camera to car plate)
-    :return safety_distance: m, for the current speed
-    """
-    safety_distance = round(current_speed * 1000/3600 * safety_time, 1)
-
-    safety_distance = max(safety_distance, min_distance)
-
-    return safety_distance
-
-
-def main1():
-    current_speed_l = [0, 5, 20, 50, 120]
-
-    for current_speed in current_speed_l:
-        safety_distance = get_safety_distance(current_speed)
-        print(f"At {current_speed} km/h, safety distance {safety_distance} m")
+        return parsing_ok, function_call_str
 
 
 if __name__ == "__main__":
-
-    main1()
+    planner = Planner()
+    print(planner.functions_schemas)

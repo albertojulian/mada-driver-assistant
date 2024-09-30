@@ -47,7 +47,7 @@ async def handle_events(websocket, path):
             elif message.split()[0] == "setSpaceEvent":
                 # print("Space event received")
                 params_str = " ".join(message.split()[1:])
-                driver_agent.assess_action(params_str)
+                driver_agent.evaluate_automatic_action(params_str)
 
             elif message.split()[0] == "setInputMessage":
                 text_input_message = " ".join(message.split()[1:])
@@ -60,7 +60,7 @@ async def handle_events(websocket, path):
 
                 else:
                     if driver_agent.memory.listen_mode is True:
-                        driver_agent.process_input_message(text_input_message)
+                        driver_agent.evaluate_action_from_request(text_input_message)
                         driver_agent.memory.listen_mode = False  # enables proactive actions
 
             elif message.split()[0] == "setSpeed":

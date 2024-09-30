@@ -128,6 +128,20 @@ class Memory:
                 print(f"Received input message: {text_input_message}")
 
 
+_memory_instance = None
+
+
+def get_memory(log=False):
+    global _memory_instance
+    if _memory_instance is None:
+        _memory_instance = Memory()
+    else:
+        if log:
+            print("Memory already exists")
+
+    return _memory_instance
+
+
 class Object:
 
     """

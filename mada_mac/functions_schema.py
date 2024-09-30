@@ -1,7 +1,7 @@
 import json
 import inspect
 from typing import get_origin, get_args, Literal
-import driver_agent
+import functions
 
 
 ##########################################################################
@@ -52,7 +52,7 @@ def generate_function_schema(func):
 
 
 # The schema of the functions in functions_list is automatically generated
-# functions_schemas = gather_functions_schema(driver_agent, functions_list)
+# functions_schemas = gather_functions_schema(functions, functions_list)
 # functions_schemas_str = str(functions_schemas)
 # print(f"functions_schemas_str {functions_schemas_str}")
 
@@ -157,7 +157,7 @@ class FunctionCallParser:
 def main1():
     functions_list = ["check_safety_distance_from_vehicle", "get_current_speed"]
 
-    functions_schema = gather_functions_schema(driver_agent, functions_list)
+    functions_schema = gather_functions_schema(functions, functions_list)
     print("\n<<<<<<<<<<< Functions schemas: ")
     print(functions_schema)
     print(">>>>>>>>>>>>>> End of Functions schemas \n")
@@ -166,19 +166,9 @@ def main1():
 
 
 def main2():
-    from driver_agent import check_safety_distance_from_vehicle  # can be used when executing eval(function_call_str)
+    from functions import check_safety_distance_from_vehicle  # can be used when executing eval(function_call_str)
 
     functions_schema = main1()
-
-    llm_response_0 = """
-    * **Question:** Are we at the safety distance from the car in front?
-
-**Response:**
-```json
-{"function_name": "check_safety_distance_from_vehicle", "parameters": [{"parameter_name": "vehicle_type", "parameter_value": "car"}, {"parameter_name": "position", "parameter_value": "in front"}]}
-``` 
-<end_of_turn>
-    """
 
     llm_response = """
         * **Question:** Is distance safe?

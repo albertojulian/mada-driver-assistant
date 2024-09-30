@@ -17,7 +17,7 @@ import yaml
 from text_to_speech import text_to_speech
 
 
-async def space_events():
+async def detect_and_track_objects():
     """
     Generates space events, defined by:
     - an object, defined by:
@@ -63,6 +63,11 @@ async def space_events():
 
         in_rgb_video = mada_config_dict.get("in_rgb_video", "rgb_4.mp4")
         in_rgb_video_path = os.path.join(in_video_dir, f"{in_rgb_video}")
+        if not os.path.isfile(in_rgb_video_path):
+            print(f"Cannot find file {in_rgb_video_path}")
+            audio_error_message = "Cannot find color video file"
+            text_to_speech(audio_error_message)
+            return
 
         rgb_cap = cv2.VideoCapture(in_rgb_video_path)
         fps = rgb_cap.get(cv2.CAP_PROP_FPS)
@@ -72,6 +77,12 @@ async def space_events():
 
         in_depth_video = mada_config_dict.get("in_depth_video", "depth_4.mkv")
         in_depth_video_path = os.path.join(in_video_dir, f"{in_depth_video}")
+        if not os.path.isfile(in_depth_video_path):
+            print(f"Cannot find file {in_depth_video_path}")
+            audio_error_message = "Cannot find depth video file"
+            text_to_speech(audio_error_message)
+            return
+
         depth_cap = cv2.VideoCapture(in_depth_video_path,
                                      apiPreference=cv2.CAP_FFMPEG,
                                      params=[
@@ -249,12 +260,13 @@ if __name__ == "__main__":
 
     # if SHOW_TRACK True, image is displayed in model.track
     SHOW_TRACK = mada_config_dict.get("show_track", False)
-    # if SHOW_DISTANCE True, image is displayed in cv2.imshow (SHOW_DISTANCE is the opposite of SHOW_TRACK)
+
+    # else if SHOW_DISTANCE True, image is displayed in cv2.imshow (SHOW_DISTANCE is the opposite of SHOW_TRACK)
     SHOW_DISTANCE = not SHOW_TRACK  # either show track id OR distance
 
     max_distance = mada_config_dict.get("max_distance_from_camera", 6)
     factor = 1000  # from mm to m; used for the depth image
 
-    print("\n<<<<<<<<<<<< Starting Object Detector >>>>>>>>>>>>\n")
+    print("\n<<<<<<<<<<<< Starting Object Detection >>>>>>>>>>>>\n")
 
-    asyncio.get_event_loop().run_until_complete(space_events())
+    asyncio.get_event_loop().run_until_complete(detect_and_track_objects())
