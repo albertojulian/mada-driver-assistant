@@ -25,7 +25,7 @@ class DriverAgent:
         self.memory = Memory()
         self.planner = Planner()
 
-    def assess_action(self, params_str, log=False):
+    def assess_automatic_action(self, params_str, log=False):
         """
 
         :param params_str
@@ -45,7 +45,6 @@ class DriverAgent:
 
         time_since_last_action = object.time_since_last_action()
 
-        # TODO: should depend on the object: a speed limit should be reported only once, but a traffic light more times
         if class_name in ["car", "bus"]:
 
             if log:
@@ -80,8 +79,9 @@ class DriverAgent:
                     # Start audio in a separate thread
                     audio_thread.start()
         # elif class_name in [speed_limit, ...]
+        # TODO: a speed limit should be reported only once, but a traffic light more times
 
-    def process_input_message(self, text_input_message, log=True):
+    def assess_request_action(self, text_input_message, log=True):
 
         text_input_message_event = self.memory.add_text_input_message(text_input_message, log=log)
 
