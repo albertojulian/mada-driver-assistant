@@ -14,38 +14,6 @@ from text_to_speech import text_to_speech
 # pip install pdfminer.six
 from pdfminer.high_level import extract_text
 
-mada_file = "mada.yaml"
-with open(mada_file) as file:
-    mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
-
-def wifi_info_mac():
-    # Ejecutar el comando `airport` para obtener el SSID
-    result = subprocess.run(
-        ['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-I'],
-        capture_output=True, text=True)
-    output = result.stdout
-    for line in output.split('\n'):
-        if ' SSID' in line:
-            ssid = line.split(":")[1].strip()
-            return ssid
-
-
-def check_mac_wifi_connection():
-    mac_ssid = wifi_info_mac()
-    android_wifi = mada_config_dict.get("android_wifi", "AndroidAJR")
-    status_ok = False
-    if mac_ssid == android_wifi:
-        mac_connected_and_phone_app = mada_config_dict.get("mac_connected_and_phone_app", "Connection with phone OK")
-        message = mac_connected_and_phone_app
-        status_ok = True
-    else:
-        mac_not_connected_and_phone_app = mada_config_dict.get("mac_not_connected_and_phone_app", "Connection with phone not OK")
-        message = mac_not_connected_and_phone_app
-
-    text_to_speech(message)
-
-    return status_ok
-
 
 # Original voices are slow => increase with audio_speed=1.75 as the -r parameter in afplay
 def say_message2(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
@@ -124,13 +92,7 @@ def main1():
     pdf2txt(file)
 
 
-def main2():
-    ssid = wifi_info_mac()
-    print(f"Conectado a la red WiFi: {ssid}")
-
-
-
 if __name__ == "__main__":
 
-    # main1()
-    main2()
+    main1()
+

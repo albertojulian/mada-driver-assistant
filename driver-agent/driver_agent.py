@@ -12,14 +12,12 @@ from functions import *
 import sys
 sys.path.append('../common')
 from text_to_speech import text_to_speech
-from utils import check_mac_wifi_connection
-from websockets_server import handle_events
 
 # Executing a function inside a string: 'check_safety_distance_from_vehicle_v0(vehicle_type="car", position="in front")'
 # - Use eval() to execute the function if it's a simple expression,
 # - or exec() if it's a statement or requires more flexibility.
 
-mada_file = "mada.yaml"
+mada_file = "driver_agent.yaml"
 with open(mada_file) as file:
     mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
@@ -180,22 +178,5 @@ class Planner:
 
 
 if __name__ == "__main__":
-
     planner = Planner()
     print(planner.functions_schemas)
-
-    mada_file = "mada.yaml"
-    with open(mada_file) as file:
-        mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
-
-    log = mada_config_dict.get("log", True)
-    driver_agent = get_driver_agent(log=log)
-    init_time = driver_agent.memory.init_time
-
-    phone_connected = mada_config_dict.get("phone_connected", "Android phone is connected")
-    phone_connected_start_object_detector = mada_config_dict.get("phone_connected_start_object_detector", "Start object detector")
-    listening_ack = mada_config_dict.get("listening_ack", "I am listening")
-
-    check_mac_wifi_connection()
-
-

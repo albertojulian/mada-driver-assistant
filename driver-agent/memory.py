@@ -1,6 +1,8 @@
 from time import time
+import sys
+sys.path.append('../common')
 from utils import is_float
-from ..common.text_to_speech import text_to_speech
+from text_to_speech import text_to_speech
 
 
 class Memory:
