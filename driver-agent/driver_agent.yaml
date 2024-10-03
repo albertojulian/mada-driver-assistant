@@ -7,7 +7,7 @@ only_ahead : True
 
 android_wifi : AndroidAJR
 mac_connected_and_phone_app : Mac is connected to Android phone wi-fi. Start speed and voice app.
-mac_not_connected_and_phone_app : Connect Mac to Android phone wi-fi. Start speed and voice app.
+mac_not_connected : Connect Mac to Android phone wi-fi.
 phone_connected : Android phone is connected  # DO NOT EDIT, MUST MATCH MESSAGE FROM PHONE
 phone_connected_start_object_detector : Android phone is connected to Mac server. Start object detector.
 listening_ack : Tell me  # acknowledge that the word "Listen" was recognised

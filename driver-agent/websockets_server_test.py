@@ -27,9 +27,9 @@ def check_mac_wifi_connection():
         message = mac_connected_and_phone_app
         status_ok = True
     else:
-        mac_not_connected_and_phone_app = mada_config_dict.get("mac_not_connected_and_phone_app",
+        mac_not_connected = mada_config_dict.get("mac_not_connected_and_phone_app",
                                                                "Connection with phone not OK")
-        message = mac_not_connected_and_phone_app
+        message = mac_not_connected
 
     text_to_speech(message)
 

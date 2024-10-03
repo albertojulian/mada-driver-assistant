@@ -24,7 +24,7 @@ The only outputs are speech audio warnings or suggestions. The approach is non-i
 
 Next figure shows the functional blocks of MADA.
 
-<img src="readme_files/esquema MADA.png" alt="MADA functional blocks" width="900" height="500" />
+<img src="assets/esquema MADA.png" alt="MADA functional blocks" width="900" height="500" />
 
 ### Object Detector
 The goal of an Object Detection model is to analyze an image and identify which object types, out of a given list, are there in the image (or frame), along with the bounding box of each object.
@@ -51,7 +51,7 @@ implement it in the same Kotlin app as the speed estimation. It uses the built-i
 Next figure shows the Driver Agent structure with an example of use (TODO) 
 
 (TODO) AÑADIR EJEMPLO DE USO DE DRIVER AGENT
-<img src="readme_files/driver_agent.png" alt="Driver Agent structure" width="900" height="500" />
+<img src="assets/driver_agent.png" alt="Driver Agent structure" width="900" height="500" />
 
  There are two types of actions:
 - **automatic actions**: respond to one or more events that correspond to some kind of risk or danger. An example can be calling a function to check if the distance to a car in front is lower than the safety distance.
@@ -92,18 +92,18 @@ Contains the following python files:
 
 It also contains other files used by the python files:
 - `yolov8m.pt`: base model used by the object detector
-- `object_detector.yaml`: contains the configuration parameters that are used by the python functions and classes
+- `object_detector.yaml`: contains the configuration parameters that are used by the python functions and classes in the object-detector folder
 
 ### driver-agent
 Contains the following python files:
 - `websockets_server.py`: implements a webSockets server that receives websocket messages from the processing modules (apps in the cell phone and object detector in the computer) and converts them into events to be stored and processed
-- `driver_agent.py`: implements the DriverAgent class, which contains as attributes the Memory and Planner classes; implements the Planner class, which manages the SLM that supports the **driver request motivated actions**; it also performs the evaluation of both automatic and request motivated actions
+- `driver_agent.py`: implements the DriverAgent class, which contains as attributes the Memory and Planner classes; implements the Planner class, which manages the SLM that supports the **driver request initiated actions**; it also performs the evaluation of both automatic and request initiated actions
 - `memory.py`: contains all class definitions to support the persistence of objects and events
 - `functions.py`: includes the definition of the functions supporting the actions
 - `functions_schema.py`: automatically generates function schemas by parsing the function definitions in `functions.py`. The schemas are used by the SLM in the Driver Agent's Planner to decide if one of the existing functions must be called. It also contains a FunctionParser class used by the Driver Agent's Planner to parse the JSON output of the SLM in function calling mode and ensure the function exists and is correctly called
 
 It also contains other files used by the python files:
-- `driver_agent.yaml`: contains the configuration parameters that are used by the python functions and classes
+- `driver_agent.yaml`: contains the configuration parameters that are used by the python functions and classes in the driver-agent folder
 
 ### common
 Contains python files used both by the object detector and the driver agent:
@@ -116,9 +116,9 @@ Clone the repository:
 git clone https://github.com/albertojulian/mada-driver-assistant.git
 ```
 ### Android apps
-Copy the folders in android-apps into AndroidStudioProjects
-Open Android Studio
-Connect the cell phone with a USB cable
+- Copy the folders in android-apps into AndroidStudioProjects
+- Open Android Studio
+- Connect the cell phone with a USB cable
 
 ### Object Detector
 Install ffmpeg and the libusb library with homebrew (Realsense camera needs a dual version of libusb: arm and x86)
@@ -132,27 +132,40 @@ conda create --name OBJECT_DETECTOR python=3.9.9
 conda activate OBJECT_DETECTOR
 ```
 
-Install torch
+Use conda to install torch
 ```
-conda install -c pytorch pytorch=2.2 torchvision
+conda install -c pytorch pytorch=2.2.1 torchvision=0.17.1
 ```
-2) 
-Install opencv (includes the python wrapper)
-## ¿4.8, 4.9, 4.10???
+
+Use conda to install opencv (includes the python wrapper)
 ```
 conda install -c conda-forge opencv=4.8
 ```
 
-(TODO)
+Use pip to install the libraries in requirements.txt
+```
+cd object-detector; pip install -r requirements.txt
+```
 
 ### Driver Agent
-2. Create a virtual conda environment and activate it:
+Install Ollama
+
+Create a virtual conda environment and activate it:
 ```
 conda create --name DRIVER_AGENT python=3.9.9
 conda activate DRIVER_AGENT
 ```
-Install Ollama
-(TODO)
+
+Use conda to install torch
+```
+conda install -c pytorch pytorch=2.2.1 torchvision=0.17.1
+```
+
+Use pip to install the libraries in requirements.txt
+```
+cd driver-agent; pip install -r requirements.txt
+```
+
 
 ## Execution instructions
 - In the Cell Phone: turn on GPS and Shared Connection
@@ -174,5 +187,3 @@ Install Ollama
 - Customize the base YOLO model to detect traffic signs
 - Fine-tune the SLM model to enable more specific and complex requests
 - Add left and right back cameras to track blind spots, in order to enable detection of vehicles in those directions when trying to move to left or right lane
-
-(TODO) requirements.txt
