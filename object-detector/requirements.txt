@@ -1,0 +1,5 @@
+gTTS==2.5.1
+pyrealsense2-macosx==2.54.2
+websockets==11.0.3
+ultralytics==8.2.2
+lapx==0.5.7  # required by ultralytics

@@ -1,0 +1,27 @@
+live : False  # True => camera, False => disk files
+# In case live is False, the following parameters & values are used
+in_video_dir : ../../videos
+in_rgb_video : rgb_5.mp4
+in_depth_video : depth_5.mkv
+
+show_track : False  # if True, image is displayed in model.track
+
+ws_ip : ws://192.168.43.233  # WebSocket server address; IP given by cell phone wi-fi;
+ws_port : 8765  # port selected for web sockets
+
+log : False
+time_between_actions: 5  # to avoid redundant actions about the same object
+only_ahead : True
+
+yolo_model : yolov8m.pt
+
+# camera parameters
+image_width : 640  # See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
+image_height : 480  # See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
+fps : 6  # frames per second. Some values: 6, 15, 25, 30... See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
+
+max_distance_from_camera : 7  # maximum distance that the camera can reliably detect;
+
+android_wifi : AndroidAJR
+object_detector_connection_error : Object Detector connection error; check if phone wi-fi is shared, Mac is connected to it and websockets server is on
+

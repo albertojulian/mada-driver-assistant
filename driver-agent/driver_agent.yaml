@@ -1,0 +1,18 @@
+ws_ip : ws://192.168.43.233  # WebSocket server address; IP given by cell phone wi-fi;
+ws_port : 8765  # port selected for web sockets
+
+log : False
+time_between_actions: 5  # to avoid redundant actions about the same object
+only_ahead : True
+
+android_wifi : AndroidAJR
+mac_connected_and_phone_app : Mac is connected to Android phone wi-fi. Start speed and voice app.
+mac_not_connected_and_phone_app : Connect Mac to Android phone wi-fi. Start speed and voice app.
+phone_connected : Android phone is connected  # DO NOT EDIT, MUST MATCH MESSAGE FROM PHONE
+phone_connected_start_object_detector : Android phone is connected to Mac server. Start object detector.
+listening_ack : Tell me  # acknowledge that the word "Listen" was recognised
+
+llm_type : ollama  # mlx or ollama
+mlx_llm : mlx-community/gemma-2-2b-it-8bit
+# mlx_llm : mlx-community/gemma-2-2b-it-4bit
+ollama_llm : gemma2:2b  # first run in terminal: "ollama run gemma2:2b"; then "/exit"
