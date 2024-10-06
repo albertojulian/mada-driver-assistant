@@ -10,7 +10,7 @@ MADA is multimodal because it includes an SLM (Small Language Model) and is surr
 MADA can also be described as "agentic" because, although it has the components that correspond to an Agent (sensors, memory, planner, actions; hence the name of the Driver Agent module), it is not yet as functional to really be considered a complete Agent.
 
 Regarding hardware, MADA is based on (and limited by) the following components I have at home:
-- an Intel Realsense D435i camera (which takes RGB and depth images)
+- an Intel Realsense D435i camera (which captures RGB and depth images)
 - a Samsung cell phone
 - an Apple M1 computer with (just) 8 GB of RAM
 
