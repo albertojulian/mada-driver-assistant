@@ -1,9 +1,9 @@
 # Basic Multimodal Agentic Driver Assistant (MADA)
 
 This MADA project's goal is having a minimum, but as functional as possible, **driver assistant** that works outdoor. Among the functionalities provided by MADA are:
-- **safety distance checking**: if there is a vehicle in front, and the current distance is lower than the safety distance for the current speed, MADA warns with an audio message.
-- **speed assistance**: when a speed limit traffic sign is detected, and the estimated speed is greater than the speed limit, MADA warns with an audio message.
-- (TODO) person or traffic light?
+- **safety distance checking**: If there is a vehicle in front, and the current distance is lower than the safety distance for the current speed, MADA warns with an audio message.
+- **speed assistance**: When a speed limit traffic sign is detected, and the estimated speed is greater than the speed limit, MADA warns with an audio message.
+- **person or traffic light warning**: When a person or traffic light is detected, it warns the driver.
 
 ### Why "multimodal" and "agentic"?
 MADA is multimodal because it includes an SLM (Small Language Model) and is surrounded by speech input and output, RGB and depth images, speed data, accelerometer and gyroscope coordinates...
@@ -40,11 +40,11 @@ The depth image of the Intel Realsense D435i camera has a point-cloud format, wh
 It is worth mentioning that depth cameras have a confidence range of distances; in the case of the Intel Realsense D435i is 0.1 – 3 meters, although still has quiet accuracy up to 6-7 meters; anyway, it would be better to have a camera with a range up to 20 meters or so.
 
 ### Speed estimation 
-(TODO)
+The speed is provided by a Kotlin app in the cell phone that takes it from the GPS.
 
 ### Speech recognition
-Speech recognition was initially performed by whisper.cpp in stream mode. However, it required 1 GB of RAM and I wanted to 
-implement it in the same Kotlin app as the speed estimation. It uses the built-in capabilities of the Android cell phone.
+Speech recognition was initially performed in the Mac by running whisper.cpp in stream mode. However, the execution required 1 GB of RAM, thus I decided to
+implement speech recognition in the cell phone, in the same Kotlin app as the speed estimation. It uses the built-in capabilities of the Android cell phone.
 
 
 ### Driver Agent
@@ -65,7 +65,9 @@ It enables the persistence of objects and events:
 - ActionEvent: mainly used to avoid repeating the same action over the same object too soon 
 
 ### Planner
-(TODO) SLM Gemma2 vs TinyLlama
+The Planner in this first version leverages on a Small Language Model powered with basic **function-calling**, which is the ability that 
+some LLMs and SLMs have to identify which function (from a given list) may be called to satisfy a driver request. 
+The SLM currently used is Gemma2, which provides acceptable function-calling by default.
 
 ### Text To speech
 Text-to-speech functionality is currently very simple: 
@@ -183,7 +185,7 @@ cd driver-agent; pip install -r requirements.txt
 - In the Cell Phone: start the SpeedVoice and AccelGyro apps
 
 ## Future work
+- Customize the base YOLO model to detect traffic signs and develop additional features enabled by the new classes detected
 - Provide functionality for the Accelerometer and Gyroscope events
-- Customize the base YOLO model to detect traffic signs
 - Fine-tune the SLM model to enable more specific and complex requests
 - Add left and right back cameras to track blind spots, in order to enable detection of vehicles in those directions when trying to move to left or right lane

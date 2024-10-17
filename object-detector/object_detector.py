@@ -267,6 +267,6 @@ if __name__ == "__main__":
     max_distance = mada_config_dict.get("max_distance_from_camera", 6)
     factor = 1000  # from mm to m; used for the depth image
 
-    print("\n<<<<<<<<<<<< Starting Object Detection >>>>>>>>>>>>\n")
+    print("\n<<<<<<<<<<<< Starting Object Detector >>>>>>>>>>>>\n")
 
     asyncio.get_event_loop().run_until_complete(detect_and_track_objects())

@@ -91,8 +91,19 @@ def main1():
 
     pdf2txt(file)
 
+def main2():
+    start_time = time()
+    message = "Your"  # speed is 70 kilometers per hour, but limit is 90. You can increase speed
+    for _ in range(10):
+        say_message1(message)
+
+    end_time = time()
+    process_time = end_time - start_time
+    print(round(process_time, 2))
+
+    # 10 repeticiones de una palabra tardan 20 s de mimic3 (local) y 12 de gtts (internet por móvil)
 
 if __name__ == "__main__":
 
-    main1()
-
+    # main1()
+    main2()

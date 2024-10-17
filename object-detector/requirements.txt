@@ -1,5 +1,6 @@
 gTTS==2.5.1
 lapx==0.5.7  # required by ultralytics
+mycroft_mimic3_tts==0.2.4  # tts when gtts fails (usually due to no coverage, as in a tunnel)
 pyrealsense2-macosx==2.54.2
 ultralytics==8.2.2
 websockets==11.0.3
