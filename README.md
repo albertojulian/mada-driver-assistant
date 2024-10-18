@@ -59,8 +59,8 @@ Next figure shows the Driver Agent structure with an example of use (TODO)
 
 ### Memory
 It enables the persistence of objects and events:
-- Object: all the types that can be detected by the object detector: car, bus, person, traffic light, traffic sign. Defined by an object type and a track id (which remains in successive frames to uniquely identify the object instance)
-- SpaceEvent: attribute of an object instance. Defined by a bounding box, a position (left, front, right, depending on the center of the bounding box)
+- MadaObject: all the types that can be detected by the object detector: car, bus, person, traffic light, traffic sign. Defined by an object type and a track id (which remains in successive frames to uniquely identify the object instance)
+- SpaceEvent: attribute of a mada object instance. Defined by a bounding box, a position (left, front, right, depending on the center of the bounding box)
 - SpeedEvent: attribute oe memory
 - ActionEvent: mainly used to avoid repeating the same action over the same object too soon 
 

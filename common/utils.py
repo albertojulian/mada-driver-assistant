@@ -12,7 +12,7 @@ from text_to_speech import text_to_speech
 # from PyPDF2 import PdfReader
 
 # pip install pdfminer.six
-from pdfminer.high_level import extract_text
+# from pdfminer.high_level import extract_text
 
 
 # Original voices are slow => increase with audio_speed=1.75 as the -r parameter in afplay
@@ -65,14 +65,13 @@ def read_pdf_v1(pdf_file):
         page = reader.pages[page_id]
         drive_txt += page.extract_text()
     return drive_txt
-"""
-
 
 def pdf2txt(file_pdf):
     file_txt = file_pdf[:-4] + ".txt"
     drive_str = extract_text(file_pdf)
     with open(file_txt, "w") as file:
         file.write(drive_str)
+"""
 
 
 def is_float(str):
@@ -82,6 +81,12 @@ def is_float(str):
     except ValueError:
         return 0
 
+def is_int(str):
+    try:
+        int(str)
+        return 1
+    except ValueError:
+        return 0
 
 def main1():
     file = "../Small Language Models AJR/0 traffic docs/dh-chapter3.pdf"

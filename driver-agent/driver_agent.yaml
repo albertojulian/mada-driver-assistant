@@ -16,3 +16,5 @@ llm_type : ollama  # mlx or ollama
 mlx_llm : mlx-community/gemma-2-2b-it-8bit
 # mlx_llm : mlx-community/gemma-2-2b-it-4bit
 ollama_llm : gemma2:2b  # first run in terminal: "ollama run gemma2:2b"; then "/exit"
+
+max_distance_from_camera : 7  # maximum distance that the camera can reliably detect

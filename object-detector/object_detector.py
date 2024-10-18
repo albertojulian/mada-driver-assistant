@@ -1,4 +1,4 @@
-# detection: normal COCO
+# detection: 23 classes, including COCO (person, car, bus, bicycle, truck, traffic light), speed limit, give way, etc
 # track
 # If LIVE == True, read from camera Intel Realsense
 # If LIVE == False, read color and depth videos from "grabar color y depth alineados uint16"
@@ -13,9 +13,12 @@ import torch
 import websockets
 import asyncio
 import yaml
+from time import sleep
 import sys
 sys.path.append('../common')
 from text_to_speech import text_to_speech
+from utils import is_int
+from paddleocr import PaddleOCR    # pip install paddlepaddle paddleocr
 
 async def detect_and_track_objects():
     """
@@ -95,8 +98,9 @@ async def detect_and_track_objects():
 
         print(f"[INFO] Start reading files '{in_rgb_video_path}' and '{in_depth_video_path}'...")
 
-    coco_traffic_classes = {0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 5: 'bus', 7: 'truck', 9: 'traffic light', }
-    coco_traffic_class_ids = coco_traffic_classes.keys()
+    mada_class_names = mada_config_dict.get("mada_class_names", None)
+    # mada_class_name2id = {mada_class_names[id]: id for id in range(len(mada_class_names))}
+    score_thresh = mada_config_dict.get("score_thresh", 0.8)
 
     # Check that MPS is available
     if not torch.backends.mps.is_available():
@@ -117,10 +121,10 @@ async def detect_and_track_objects():
     model = YOLO(yolo_model).to(device)
 
     n_frame = 0
+    init_frame = mada_config_dict.get("init_frame", 0)
 
-    init_second = 0  # 90
-    init_frame = init_second * fps
-    # init_frame = 547
+    paddle_ocr = PaddleOCR(use_angle_cls=False, ocr_version='PP-OCRv4', lang='en', show_log=False)
+    # paddle_ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False)
 
     try:
 
@@ -151,10 +155,11 @@ async def detect_and_track_objects():
                     if n_frame < init_frame:
                         continue
 
+                    sleep(sleep_time)
+
                 # Perform the actual detection by running the model with the image as input
                 results = model.track(color_image, device=device, persist=True, show=SHOW_TRACK)
                 result = results[0]
-                class_names = result.names  # {0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 5: 'bus', ...
                 if isinstance(result.boxes.id, list) or result.boxes.id is not None:
                     track_ids = np.array(result.boxes.id.cpu(), dtype="int")
                     classes = np.array(result.boxes.cls.cpu(), dtype="int")
@@ -164,14 +169,37 @@ async def detect_and_track_objects():
                     for track_id, class_id, score, box in zip(track_ids, classes, scores, boxes):
 
                         score = float("{:.2f}".format(score))
-                        print(f"[DEBUG] track_id: {track_id}, class: {class_id} {class_names[class_id]}, score: {score}")
+                        print(f"[DEBUG] track_id: {track_id}, class: {class_id} {mada_class_names[class_id]}, score: {score}")
 
-                        if score > 0.8 and class_id in coco_traffic_class_ids:
-                            class_name = class_names[class_id]
+                        if score > score_thresh:
+                            params = dict()
+
+                            class_name = mada_class_names[class_id]
+                            if class_name == "speed limit":
+                                # ocr
+                                bbox_image = get_bbox_image(color_image, box)
+                                bbox_image = resize_to_min_dimension(bbox_image, target_min_size=60)
+                                result = paddle_ocr.ocr(bbox_image, cls=False)
+                                # result = paddle_ocr.ocr(bbox_image, cls=True)
+                                if result[0] is not None:
+                                    speed_limit = result[0][0][1][0]
+                                    prob = result[0][0][1][1]
+                                    prob = int(100 * round(prob, 2))
+
+                                    print(f"Speed limit is {speed_limit} with prob {prob}%")
+                                    if is_int(speed_limit):
+                                        speed_limit = int(speed_limit)
+                                        if speed_limit in speed_limits:
+                                            params["SPEED_LIMIT"] = speed_limit
+
+                            elif class_name == "traffic light":
+                                # color
+                                bbox_image = get_bbox_image(color_image, box)
+                                traffic_light_color = classify_traffic_light(bbox_image)
+                                print(f"traffic_light_color is {traffic_light_color}")
 
                             object_distance = cv2_rect_text(color_image, depth_image, box, class_name)
 
-                            params = dict()
                             params["IMAGE_WIDTH"] = image_width
                             params["IMAGE_HEIGHT"] = image_height
                             params["TRACK_ID"] = track_id
@@ -215,11 +243,76 @@ async def detect_and_track_objects():
         await websocket.close()
 
 
-def cv2_rect_text(color_image, depth_image, box, class_name):
-    left = int(box[0])
-    top = int(box[1])
-    right = int(box[2])
-    bottom = int(box[3])
+def get_bbox_image(image, bbox):
+
+    left, top, right, bottom = map(int, bbox)
+    bbox_image = image[top:bottom, left:right]
+
+    return bbox_image
+
+
+def resize_to_min_dimension(image, target_min_size=60):
+    # Obtener dimensiones actuales
+    height, width = image.shape[:2]
+
+    if height >= target_min_size and width >= target_min_size:    # no hay que escalar
+        return image
+
+    # Calcular el factor de escalado
+    if height < width:
+        scale_factor = target_min_size / height
+    else:
+        scale_factor = target_min_size / width
+
+    # Calcular las nuevas dimensiones manteniendo la proporción
+    new_width = int(round(width * scale_factor, 0))
+    new_height = int(round(height * scale_factor, 0))
+
+    # Redimensionar la imagen
+    resized_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
+
+    return resized_image
+
+
+def classify_traffic_light(bbox_image):
+
+    # Convertir a escala de grises y difuminar para reducir el ruido
+    gray = cv2.cvtColor(bbox_image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    # Aplicar un umbral para detectar las luces encendidas
+    _, thresh = cv2.threshold(blurred, 200, 255, cv2.THRESH_BINARY)
+
+    # Dividir el bounding box en tercios (superior, central, inferior)
+    height = thresh.shape[0]
+    top_section = thresh[:height // 3, :]
+    middle_section = thresh[height // 3:2 * height // 3, :]
+    bottom_section = thresh[2 * height // 3:, :]
+
+    # Contar los píxeles blancos en cada sección
+
+    #############################################
+    # TODO: cuando bbox está inclinada se cuelan pixeles claros por los lados y puede decidir mal
+    #############################################
+
+    top_white_pixels = cv2.countNonZero(top_section)
+    middle_white_pixels = cv2.countNonZero(middle_section)
+    bottom_white_pixels = cv2.countNonZero(bottom_section)
+
+    # Determinar el estado del semáforo basado en la sección con más píxeles blancos
+    if top_white_pixels > middle_white_pixels and top_white_pixels > bottom_white_pixels:
+        return "red"
+    elif middle_white_pixels > top_white_pixels and middle_white_pixels > bottom_white_pixels:
+        return "yellow"
+    elif bottom_white_pixels > top_white_pixels and bottom_white_pixels > middle_white_pixels:
+        return "green"
+    else:
+        return "off"
+
+
+def cv2_rect_text(color_image, depth_image, bbox, class_name):
+
+    left, top, right, bottom = map(int, bbox)
 
     # draw box
     cv2.rectangle(color_image, (left, top), (right, bottom), (255, 0, 0), 2, 1)
@@ -266,6 +359,10 @@ if __name__ == "__main__":
 
     max_distance = mada_config_dict.get("max_distance_from_camera", 6)
     factor = 1000  # from mm to m; used for the depth image
+
+    sleep_time = mada_config_dict.get("sleep_time", 0)
+
+    speed_limits = mada_config_dict.get("speed_limits", None)
 
     print("\n<<<<<<<<<<<< Starting Object Detector >>>>>>>>>>>>\n")
 

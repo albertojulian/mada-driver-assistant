@@ -13,9 +13,8 @@ import io
 def text_to_speech(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
 
     if print_message:
-        print("\n<<<<<<<<<<< Start printing audio message: ")
-        print(message)
-        print(">>>>>>>>>>>>>> End printing audio message\n")
+        print("\n<<<<<<<<<<< Printing audio message >>>>>>>>>>>>>>")
+        print(f"{message}\n")
 
     # Create the gTTS object with the message
     # tts = gTTS(message, lang='es')
