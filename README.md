@@ -35,10 +35,12 @@ The goal of an Object Detection model is to analyze an image and identify which 
 are there in the image (or frame), along with the bounding box of each object.
 
 **Object Tracking**
+
 After detection, tracking is performed to keep the objects uniquely identified in successive frames. 
 Tracked objects and their associated space events are memorized in order to enable certain actions.
 
 **Distance**
+
 The depth image of the Intel Realsense D435i camera has a point-cloud format, which is filtered with only the points 
 inside the bounding box limits of the object instance in the RGB image. The depth of those points is averaged, 
 giving an average distance from the camera to the object as a result.
@@ -54,6 +56,7 @@ The current version of MADA's Object Detector is a customization of the YOLO v8 
 - **S2TLD (SJTU Small Traffic Light Detection; SJTU is Shanghai Jiao Tong University)**: provides traffic light images and annotations, with separate types for red, green and yellow lights.
 
 **Image annotation**
+
 Since images from each of the datasets might have non-annotated instances of classes considered only in another dataset 
 (for instance, the images in the S2TLD dataset have only annotations of traffic lights, but there are also non-annotated 
 cars, crossing people traffic signs), I had to review the whole dataset to add annotations (labels and bounding boxes) for the non-annotated instances.
@@ -62,11 +65,13 @@ The merging of images and annotations from different datasets was finalised in t
 (TODO) Training: Google Colab 2 hours, MAP, etc
 
 **Speed limit signs and OCR**
+
 Initially, I considered each speed limit as a separate type; since it is difficult to get a balanced number images from all speed limits, 
 it was also difficult to make the YOLO model detect them properly: the confusion matrix showed there were frequent inter-speed limit errors. 
 Then I decided to merge all the speed limits into just one type and apply an OCR to the bounding box image.
 
 **Traffic lights transitions**
+
 Initially, there were separate types for red, green and yellow lights. However, I realized it is convenient to manage 
 transitions between lights as states inside the same traffic light instance; for example, green to yellow is interpreted as a speed reduction action, 
 while red to yellow is interpreted as a pedestrian crossing warning, both inside the same traffic light instance.
@@ -74,6 +79,7 @@ Therefore, I decided to merge the 3 traffic light types into one, where the stat
 assigned by applying classic computer vision techniques to the bounding box image.
 
 **Final dataset**
+
 After the speed limits and traffic lights mergings, the resulting dataset is composed of 3160 training images and 
 750 validation images, and the corresponding label files with a minimum of 200 annotations of 23 different image classes.
 
