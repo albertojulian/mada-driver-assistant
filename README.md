@@ -6,8 +6,10 @@ This MADA project's goal is having a minimum, but as functional as possible, **d
 - **person or traffic light warning**: When a person or traffic light is detected, it warns the driver.
 
 ### Why "multimodal" and "agentic"?
-MADA is multimodal because it includes an SLM (Small Language Model) and is surrounded by speech input and output, RGB and depth images, speed data, accelerometer and gyroscope coordinates...
-MADA can also be described as "agentic" because, although it has the components that correspond to an Agent (sensors, memory, planner, actions; hence the name of the Driver Agent module), it is not yet as functional to really be considered a complete Agent.
+MADA is multimodal because it includes an SLM (Small Language Model) and is surrounded by speech input and output, 
+RGB and depth images, speed data, accelerometer and gyroscope coordinates...
+MADA can also be described as "agentic" because, although it has the components that correspond to an Agent 
+(sensors, memory, planner, actions; hence the name of the Driver Agent module), it is not yet as functional to really be considered a complete Agent.
 
 Regarding hardware, MADA is based on (and limited by) the following components I have at home:
 - an Intel Realsense D435i camera (which captures RGB and depth images)
@@ -19,34 +21,58 @@ MADA is composed of several sensors and processing modules:
 - the **camera** takes RGB and depth images. They are processed by the **Object Detector** in the computer, which detects objects (cars, traffic lights) and provides the object type, the bounding box and the position, along with the mean distance from the camera
 - the **cell phone** gets the **speed** from the GPS, **recognizes driver speech requests**, gets the coordinates from the **accelerometer** and **gyroscope**, and sends all this data to the computer. On the other hand, the cell phone **provides wi-fi** to the computer.
 
-All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events to be stored in the Memory and analyzed in the Planner to assess if some action should be initiated.
-The only outputs are speech audio warnings or suggestions. The approach is non-invasive: there is no intention to take control of the car, just to assist the driver with speech messages.
+All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
+to be stored in the Memory and analyzed in the Planner to assess if some action should be initiated.
+The only outputs are speech audio warnings or suggestions. The approach is non-invasive: there is no intention to take 
+control of the car, just to assist the driver with speech messages.
 
 Next figure shows the functional blocks of MADA.
 
 <img src="assets/esquema MADA.png" alt="MADA functional blocks" width="900" height="500" />
 
 ### Object Detector
-The goal of an Object Detection model is to analyze an image and identify which object types, out of a given list, are there in the image (or frame), along with the bounding box of each object.
-
-The current version of MADA is based on the YOLO v8 Object Detector model; the selected size of the models is medium: nano does not detect well enough, and bigger models run too slow in the platform.
-The base model has been customized by training with images and annotations (when available) from several datasets:
-- which provides several types useful for MADA: person, car, bus, bicycle, truck, traffic light. In future versions of MADA the Object Detector will be customized to detect additional object types, mainly traffic signs.
+The goal of an Object Detection model is to analyze an image and identify which object types, out of a given list, 
+are there in the image (or frame), along with the bounding box of each object.
 
 **Object Tracking**
-After detection, tracking is performed to keep the objects uniquely identified in successive frames. Tracked objects and their associated space events are memorized in order to enable certain actions.
+After detection, tracking is performed to keep the objects uniquely identified in successive frames. 
+Tracked objects and their associated space events are memorized in order to enable certain actions.
 
 **Distance**
-The depth image of the Intel Realsense D435i camera has a point-cloud format, which is filtered with only the points inside the bounding box limits of the object instance in the RGB image. The depth of those points is averaged, giving an average distance from the camera to the object as a result.
-It is worth mentioning that depth cameras have a confidence range of distances; in the case of the Intel Realsense D435i is 0.1 – 3 meters, although still has quiet accuracy up to 6-7 meters; anyway, it would be better to have a camera with a range up to 20 meters or so.
+The depth image of the Intel Realsense D435i camera has a point-cloud format, which is filtered with only the points 
+inside the bounding box limits of the object instance in the RGB image. The depth of those points is averaged, 
+giving an average distance from the camera to the object as a result.
+It is worth mentioning that depth cameras have a confidence range of distances; in the case of the 
+Intel Realsense D435i is 0.1 – 3 meters, although still has quiet accuracy up to 6-7 meters; anyway, 
+it would be better to have a camera with a range up to 20 meters or so.
+
+### Datasets
+The current version of MADA's Object Detector is a customization of the YOLO v8 Object Detector model, fine-tuned with images and annotations (when available) from several datasets:
+- **Microsoft's COCO 2017**: includes more than 80 general image types, from which a few are useful for MADA: person, car, bus, bicycle, truck, motorcycle.
+- **GTSDB (German Traffic Sign Detection Benchmark)**: composed of images and annotations of more than 40 traffic sign classes, and some of them have been selected for MADA: speed limits, stop, give way, roundabout, pedestrian crossing...
+- **DFG-TSD (DFG Traffic Sign Dataset; DFG is a Slovenian company)**: includes more than 200 traffic sign classes, from which some have been selected to complement GTSDB types with few examples or not included: some speed limits, dead end street, no left turn, no right turn, no priority.
+- **S2TLD (SJTU Small Traffic Light Detection; SJTU is Shanghai Jiao Tong University)**: provides traffic light images and annotations, with separate types for red, green and yellow lights.
+
+(TODO) Roboflow
+
+**Speed limit signs and OCR**
+Initially, I considered each speed limit as a separate type; since it is difficult to get a balanced number images from all speed limits, 
+it was also difficult to make the YOLO model detect them properly: the confusion matrix showed there were frequent inter-speed limit errors. 
+Then I decided to merge all the speed limits into just one type and apply an OCR to the bounding box image.
+
+**Traffic lights**
+Initially, there were separate types for red, green and yellow lights. Then I realized it is convenient to manage 
+transitions between lights, and I decided to merge the 3 traffic light types into one, where the state corresponds to the color which is
+assigned by applying classic computer vision techniques to the bounding box image.
 
 ### Speed estimation 
 The speed is provided by a Kotlin app in the cell phone that takes it from the GPS.
 
 ### Speech recognition
-Speech recognition was initially performed in the Mac by running whisper.cpp in stream mode. However, the execution required 1 GB of RAM, thus I decided to
-implement speech recognition in the cell phone, in the same Kotlin app as the speed estimation. It uses the built-in capabilities of the Android cell phone.
-
+Speech recognition was initially performed in the Mac by running whisper.cpp in stream mode. 
+However, the execution required 1 GB of RAM, thus I decided to
+implement speech recognition in the cell phone, in the same Kotlin app as the speed estimation. 
+It uses the built-in capabilities of the Android cell phone.
 
 ### Driver Agent
 Next figure shows the Driver Agent structure with an example of use (TODO) 
@@ -66,7 +92,7 @@ It enables the persistence of objects and events:
 - ActionEvent: mainly used to avoid repeating the same action over the same object too soon 
 
 ### Planner
-The Planner in this first version leverages on a Small Language Model powered with basic **function-calling**, which is the ability that 
+The Planner leverages on a Small Language Model powered with basic **function-calling**, which is the ability that 
 some LLMs and SLMs have to identify which function (from a given list) may be called to satisfy a driver request. 
 The SLM currently used is Gemma2, which provides acceptable function-calling by default.
 
@@ -90,7 +116,7 @@ The driver speech is recognised and converted into text by the package **android
 
 ### object-detector
 Contains the following python files:
-- `object_detector.py`: implements object detection and tracking. In "live" mode it captures the RGB and Depth images from the camera; otherwise, it takes them from videos
+- `object_detector.py`: implements object detection and tracking; it also applies character recognition (through PaddleOCR) to the speed limit signs bounding boxes. In "live" mode it captures the RGB and Depth images from the camera; otherwise, it takes them from videos.
 - `record_rgb_and_depth_videos.py`: records RGB and depth videos to support changes in the object detector indoor without having to connect the camera.
 
 It also contains other files used by the python files:
@@ -186,7 +212,6 @@ cd driver-agent; pip install -r requirements.txt
 - In the Cell Phone: start the SpeedVoice and AccelGyro apps
 
 ## Future work
-- Customize the base YOLO model to detect traffic signs and develop additional features enabled by the new classes detected
-- Provide functionality for the Accelerometer and Gyroscope events
 - Fine-tune the SLM model to enable more specific and complex requests
+- Provide functionality for the Accelerometer and Gyroscope events
 - Add left and right back cameras to track blind spots, in order to enable detection of vehicles in those directions when trying to move to left or right lane
