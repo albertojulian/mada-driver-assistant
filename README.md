@@ -48,22 +48,34 @@ it would be better to have a camera with a range up to 20 meters or so.
 
 ### Datasets
 The current version of MADA's Object Detector is a customization of the YOLO v8 Object Detector model, fine-tuned with images and annotations (when available) from several datasets:
-- **Microsoft's COCO 2017**: includes more than 80 general image types, from which a few are useful for MADA: person, car, bus, bicycle, truck, motorcycle.
+- **Microsoft's COCO (Common Objects in COntext)**: includes more than 80 general image types, from which a few are useful for MADA: person, car, bus, bicycle, truck, motorcycle.
 - **GTSDB (German Traffic Sign Detection Benchmark)**: composed of images and annotations of more than 40 traffic sign classes, and some of them have been selected for MADA: speed limits, stop, give way, roundabout, pedestrian crossing...
-- **DFG-TSD (DFG Traffic Sign Dataset; DFG is a Slovenian company)**: includes more than 200 traffic sign classes, from which some have been selected to complement GTSDB types with few examples or not included: some speed limits, dead end street, no left turn, no right turn, no priority.
+- **DFG-TSD (DFG Traffic Sign Dataset; DFG is a Slovenian company)**: includes more than 200 traffic sign classes, from which some have been selected to complement those less represented in GTSDB or not included: some speed limits, dead end street, no left turn, no right turn, no priority.
 - **S2TLD (SJTU Small Traffic Light Detection; SJTU is Shanghai Jiao Tong University)**: provides traffic light images and annotations, with separate types for red, green and yellow lights.
 
-(TODO) Roboflow
+**Image annotation**
+Since images from each of the datasets might have non-annotated instances of classes considered only in another dataset 
+(for instance, the images in the S2TLD dataset have only annotations of traffic lights, but there are also non-annotated 
+cars, crossing people traffic signs), I had to review the whole dataset to add annotations (labels and bounding boxes) for the non-annotated instances.
+The merging of images and annotations from different datasets was finalised in the Roboflow platform.
+
+(TODO) Training: Google Colab 2 hours, MAP, etc
 
 **Speed limit signs and OCR**
 Initially, I considered each speed limit as a separate type; since it is difficult to get a balanced number images from all speed limits, 
 it was also difficult to make the YOLO model detect them properly: the confusion matrix showed there were frequent inter-speed limit errors. 
 Then I decided to merge all the speed limits into just one type and apply an OCR to the bounding box image.
 
-**Traffic lights**
-Initially, there were separate types for red, green and yellow lights. Then I realized it is convenient to manage 
-transitions between lights, and I decided to merge the 3 traffic light types into one, where the state corresponds to the color which is
+**Traffic lights transitions**
+Initially, there were separate types for red, green and yellow lights. However, I realized it is convenient to manage 
+transitions between lights as states inside the same traffic light instance; for example, green to yellow is interpreted as a speed reduction action, 
+while red to yellow is interpreted as a pedestrian crossing warning, both inside the same traffic light instance.
+Therefore, I decided to merge the 3 traffic light types into one, where the state corresponds to the color which is
 assigned by applying classic computer vision techniques to the bounding box image.
+
+**Final dataset**
+After the speed limits and traffic lights mergings, the resulting dataset is composed of 3160 training images and 
+750 validation images, and the corresponding label files with a minimum of 200 annotations of 23 different image classes.
 
 ### Speed estimation 
 The speed is provided by a Kotlin app in the cell phone that takes it from the GPS.

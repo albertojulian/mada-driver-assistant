@@ -173,12 +173,27 @@ async def detect_and_track_objects():
                         print(f"[DEBUG] track_id: {track_id}, class: {class_id} {mada_class_names[class_id]}, score: {score}")
 
                         if score > score_thresh:
-                            params = dict()
 
-                            pre_text = ""
-                            post_text = ""
                             class_name = mada_class_names[class_id]
-                            if class_name == "speed limit":
+                            pre_text = ""   # for traffic light
+                            post_text = ""  # for speed limit
+
+                            params = dict()
+                            params["IMAGE_WIDTH"] = image_width
+                            params["IMAGE_HEIGHT"] = image_height
+                            params["TRACK_ID"] = track_id
+                            params["CLASS_ID"] = class_id
+                            params["CLASS_NAME"] = class_name
+                            params["BOUNDING_BOX"] = list(box)  # box example: array([314, 166, 445, 302]) => array generates error when decoding
+
+                            if class_name == "traffic light":
+                                # color
+                                bbox_image = get_bbox_image(color_image, box)
+                                traffic_light_color = classify_traffic_light(bbox_image)
+                                # print(f"traffic_light_color is {traffic_light_color}")
+                                params["TRAFFIC_LIGHT_COLOR"] = traffic_light_color
+                                pre_text = f"{traffic_light_color} "
+                            elif class_name == "speed limit":
                                 # ocr
                                 bbox_image = get_bbox_image(color_image, box)
                                 bbox_image = resize_to_min_dimension(bbox_image, target_min_size=60)
@@ -196,25 +211,9 @@ async def detect_and_track_objects():
                                             params["SPEED_LIMIT"] = speed_limit
                                             post_text = f" {speed_limit}"
 
-                            elif class_name == "traffic light":
-                                # color
-                                bbox_image = get_bbox_image(color_image, box)
-                                traffic_light_color = classify_traffic_light(bbox_image)
-                                # print(f"traffic_light_color is {traffic_light_color}")
-                                params["TRAFFIC_LIGHT_COLOR"] = traffic_light_color
-                                pre_text = f"{traffic_light_color} "
-
                             object_distance = cv2_rect_text(color_image, depth_image, box,
                                                             class_name, pre_text, post_text)
-
-                            params["IMAGE_WIDTH"] = image_width
-                            params["IMAGE_HEIGHT"] = image_height
-                            params["TRACK_ID"] = track_id
-                            params["CLASS_ID"] = class_id
-                            params["CLASS_NAME"] = class_name
-                            params["BOUNDING_BOX"] = list(box)  # box example: array([314, 166, 445, 302]) => array generates error when decoding
                             params["OBJECT_DISTANCE"] = object_distance
-
                             message = "setSpaceEvent " + str(params)
                             await websocket.send(message)
 
