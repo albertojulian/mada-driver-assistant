@@ -1,10 +1,11 @@
-import sys
-sys.path.append('../common')
-from text_to_speech import text_to_speech
 import yaml
 from typing import Literal
 import threading
 from memory import get_memory
+import sys
+sys.path.append("../common")
+from text_to_speech import text_to_speech
+
 
 mada_file = "driver_agent.yaml"
 with open(mada_file) as file:

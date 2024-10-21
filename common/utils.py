@@ -6,7 +6,6 @@ import subprocess
 import yaml
 
 import os
-from text_to_speech import text_to_speech
 
 # pip install PyPDF2
 # from PyPDF2 import PdfReader

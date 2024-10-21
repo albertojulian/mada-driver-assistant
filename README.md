@@ -29,8 +29,9 @@ Next figure shows the functional blocks of MADA.
 ### Object Detector
 The goal of an Object Detection model is to analyze an image and identify which object types, out of a given list, are there in the image (or frame), along with the bounding box of each object.
 
-The first version of MADA is based on the base YOLO v8 Object Detector model; the selected size of the models is medium: nano does not detect well enough, and bigger models run too slow in the platform.
-The base model was trained on the COCO 2017 dataset, which provides several types useful for MADA: person, car, bus, bicycle, truck, traffic light. In future versions of MADA the Object Detector will be customized to detect additional object types, mainly traffic signs.
+The current version of MADA is based on the YOLO v8 Object Detector model; the selected size of the models is medium: nano does not detect well enough, and bigger models run too slow in the platform.
+The base model has been customized by training with images and annotations (when available) from several datasets:
+- which provides several types useful for MADA: person, car, bus, bicycle, truck, traffic light. In future versions of MADA the Object Detector will be customized to detect additional object types, mainly traffic signs.
 
 **Object Tracking**
 After detection, tracking is performed to keep the objects uniquely identified in successive frames. Tracked objects and their associated space events are memorized in order to enable certain actions.

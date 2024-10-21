@@ -7,8 +7,16 @@ from time import time, sleep
 import numpy as np
 import wave
 import io
+import threading
 
 # pip install mycroft-mimic3-tts[all]  # Removing [all] will install support for English only.
+
+def text_to_speech_async(output_message):
+
+    audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
+    # Start audio in a separate thread
+    audio_thread.start()
+
 
 def text_to_speech(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
 
@@ -65,6 +73,7 @@ def check_tts():
         text_to_speech(message)
         sleep(3)
 
+
 def create_gtts_connection_error_audio():
 
     message = "gtts connection error. Check if the Mac is connected to internet"
@@ -73,12 +82,12 @@ def create_gtts_connection_error_audio():
         import shutil
         shutil.copy("tts_out.mp3", "gtts_connection_error.mp3")
 
+
 def text_to_speech2(message, audio_speed=1.75, print_message=True, lang='en'):
 
     if print_message:
-        print("\n<<<<<<<<<<< Start printing audio message: ")
+        print("\n<<<<<<<<<<< Printing audio message >>>>>>>>>>>>>>")
         print(message)
-        print(">>>>>>>>>>>>>> End printing audio message\n")
 
     audio_data = gtts_tts(message, lang)
 
@@ -122,6 +131,7 @@ def mimic3_tts(message):
         print(f"Error con Mimic3: {e}")
         return None
 
+
 def play_audio(audio_data):
     with wave.open(audio_data, 'rb') as wf:
         sample_rate = wf.getframerate()
@@ -134,6 +144,7 @@ def play_audio(audio_data):
 
         sd.play(audio_array, samplerate=sample_rate)
         sd.wait()
+
 
 def convert_mp3_to_wav(mp3_data):
     process = subprocess.Popen(['ffmpeg', '-i', 'pipe:0', '-f', 'wav', 'pipe:1'],

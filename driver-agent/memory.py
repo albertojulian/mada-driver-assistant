@@ -1,8 +1,8 @@
 from time import time
 import sys
-sys.path.append('../common')
+sys.path.append("../common")
 from utils import is_float
-from text_to_speech import text_to_speech
+from text_to_speech import text_to_speech_async
 
 
 class Memory:
@@ -70,7 +70,10 @@ class Memory:
             class_ref = getattr(mada_classes, python_mada_class_name, None)
 
         if class_ref is None:
-            print(f"There is no class {python_mada_class_name} defined")
+            output = f"There is no class {python_mada_class_name} defined"
+            print(output)
+            text_to_speech_async(output)
+
             return None
 
         mada_object = class_ref(params, self.init_time)
@@ -117,7 +120,7 @@ class Memory:
         elif z < -umbral:
             message = "Turning left"
 
-        text_to_speech(message)
+        text_to_speech_async(message)
 
     def add_text_input_message(self, text_input_message, log=False):
         text_input_message_event = SpeechToTextEvent(text_input_message, self.init_time)
@@ -186,10 +189,8 @@ class MadaObject:
         self.image_height = params["IMAGE_HEIGHT"]
         self.track_id = params["TRACK_ID"]
 
-
         self.class_name = params["CLASS_NAME"]
         self.class_id = params["CLASS_ID"]
-
 
         self.init_time = init_time
         self.space_events = []

@@ -16,7 +16,7 @@ from driver_agent import get_driver_agent
 import yaml
 from time import time
 import sys
-sys.path.append('../common')
+sys.path.append("../common")
 from text_to_speech import text_to_speech
 
 

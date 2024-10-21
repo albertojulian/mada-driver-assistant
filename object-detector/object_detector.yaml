@@ -3,8 +3,8 @@ live : False  # True => camera, False => disk files
 in_video_dir : ../../videos
 in_rgb_video : rgb_5.mp4
 in_depth_video : depth_5.mkv
-init_frame : 2052    # 449, 1107 for give way, 800, 980 for speed limit, 1640 (green), 2052 (red) traffic light
-sleep_time : 0
+init_frame : 3900    # 449, 1107 for give way, 800, 980 for speed limit, 1640 (green pequeño), 2052 (red), 2434 (red to green) traffic light
+sleep_time : 0.5
 
 show_track : False  # if True, image is displayed in model.track
 
@@ -16,7 +16,8 @@ time_between_actions: 5  # to avoid redundant actions about the same object
 only_ahead : True
 
 # yolo_model : yolov8m.pt    # v0.1
-yolo_model : yolov8m_redu_e20_best.pt
+# yolo_model : yolov8m_redu_e20_best.pt
+yolo_model : yolov8m_redu_e40_best.pt
 
 mada_class_names : ['bicycle', 'bus', 'car', 'construction', 'cycles crossing', 'dead end street',
                     'give way', 'go left', 'go right', 'motorcycle', 'no entry', 'no left turn', 'no overtaking',
@@ -26,6 +27,7 @@ mada_class_names : ['bicycle', 'bus', 'car', 'construction', 'cycles crossing', 
 score_thresh : 0.5
 
 speed_limits : [20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
+traffic_light_threshold_perc : 0.04    # below this percentaje the traffic light is considered off
 
 # camera parameters
 image_width : 640  # See "rs-enumerate-devices modos y resoluciones x y z.xlsx"

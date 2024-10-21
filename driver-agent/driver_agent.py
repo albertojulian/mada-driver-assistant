@@ -10,8 +10,9 @@ from time import time
 import functions
 from functions import *
 import sys
-sys.path.append('../common')
+sys.path.append("../common")
 from text_to_speech import text_to_speech
+
 
 # Executing a function inside a string: 'check_safety_distance_from_vehicle_v0(vehicle_type="car", position="in front")'
 # - Use eval() to execute the function if it's a simple expression,
@@ -47,86 +48,6 @@ class DriverAgent:
 
         # object, _ = self.memory.manage_space_event(params, log=log)
         self.memory.manage_space_event(params, log=log)
-        """
-        space_event = object.space_events[-1]
-        object_position = space_event.object_position  # position of last space event
-
-        class_name = params["CLASS_NAME"]
-        class_id = params["CLASS_ID"]
-
-        object_distance = params["OBJECT_DISTANCE"]  # distance from the camera (ego car) to the object
-
-        time_since_last_action = object.time_since_last_action()
-
-        if class_name in ["car", "bus"]:
-
-            if log:
-                print(f"time_since_last_action {time_since_last_action}")
-
-            # if last action was more than x seconds ago, perform action
-            if time_since_last_action > TIME_BETWEEN_ACTIONS:
-                if object_position == "in front":
-                    too_close, output_message = check_safety_distance_from_vehicle(vehicle=object, space_event=space_event, report_always=False)
-                    if too_close:
-                        object.add_action_event(params, output_message)
-
-        elif class_name in ["person"]:
-            # if last action was more than x seconds ago, perform action
-            if time_since_last_action > TIME_BETWEEN_ACTIONS:
-                max_distance = mada_config_dict.get("max_distance_from_camera", 6)
-                if object_distance > max_distance:
-                    output_message = f"{class_name} {object_position} is more than {max_distance} meters away."
-                else:
-                    output_message = f"{class_name} {object_position} at {object_distance} meters."
-
-                if log:
-                    print(f"[ACTION] class_id: {class_id}, output message: {output_message}")
-
-                object.add_action_event(params, output_message)
-
-                if self.memory.listen_mode is False:
-                    audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
-                    # Start audio in a separate thread
-                    audio_thread.start()
-
-        elif class_name == "traffic light":
-
-            if time_since_last_action == 1000:
-                output_message = f"{class_name} {object_position}"
-                object.add_action_event(params, output_message)
-                if self.memory.listen_mode is False:
-                    audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
-                    # Start audio in a separate thread
-                    audio_thread.start()
-
-
-            # TODO: infer color by vertical position of light
-            # TODO: check transitions
-
-
-        elif class_name == "speed_limit":
-            # report only once
-            if time_since_last_action == 1000:
-                output_message = f"Reduce speed, {class_name} {object_position}"
-                object.add_action_event(params, output_message)
-                if self.memory.listen_mode is False:
-                    audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
-                    # Start audio in a separate thread
-                    audio_thread.start()
-
-            # TODO: apply OCR
-
-
-        elif class_name in ["give way", "pedestrian crossing"]:
-            # warn the driver to reduce speed
-            if time_since_last_action == 1000:
-                output_message = f"Reduce speed, {class_name} signal {object_position}"
-                object.add_action_event(params, output_message)
-                if self.memory.listen_mode is False:
-                    audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
-                    # Start audio in a separate thread
-                    audio_thread.start()
-        """
 
     def evaluate_action_from_request(self, text_input_message, log=True):
 

@@ -3,8 +3,9 @@ import websockets
 import subprocess
 import yaml
 import sys
-sys.path.append('../common')
+sys.path.append("../common")
 from text_to_speech import text_to_speech
+
 
 def wifi_info_mac():
     # Ejecutar el comando `airport` para obtener el SSID
