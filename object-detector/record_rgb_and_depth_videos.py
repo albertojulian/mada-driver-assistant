@@ -3,94 +3,98 @@ import numpy as np
 import cv2
 import os
 import glob
-
-pipe = rs.pipeline()
-
-config = rs.config()
-pipeline_wrapper = rs.pipeline_wrapper(pipe)
-pipeline_profile = config.resolve(pipeline_wrapper)
-device = pipeline_profile.get_device()
-device_product_line = str(device.get_info(rs.camera_info.product_line))
-print(device_product_line)  # D400
-
-align_to = rs.stream.color
-aligned_stream = rs.align(align_to=align_to)  # alignment between color and depth
-# point_cloud = rs.pointcloud()
-
-width = 640
-height = 480
-fps = 15  # 6??, 25, 30
-config.enable_stream(rs.stream.depth, width, height, rs.format.z16, fps)
-config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)
-
-pipe.start(config)
-
-out_video_dir = "videos"
-
-out_rgb_video_base = "rgb"
-rgb_videos = glob.glob(os.path.join(out_video_dir, f"{out_rgb_video_base}*.mp4"))
-next_id = len(rgb_videos)
-out_rgb_video_path = os.path.join(out_video_dir, f"{out_rgb_video_base}_{next_id}.mp4")
-
-out_depth_video_base = "depth"
-out_depth_video_path = os.path.join(out_video_dir, f"{out_depth_video_base}_{next_id}.mkv")
+import yaml
+from realsense_camera import RealSenseCamera
 
 
-rgb_vid_writer = cv2.VideoWriter(
-    out_rgb_video_path,
-    cv2.VideoWriter_fourcc(*'mp4v'),
-    fps,
-    (width, height)
-)
+class VideoRecorder:
 
-depth_vid_writer = cv2.VideoWriter(
-    out_depth_video_path,
-    apiPreference=cv2.CAP_FFMPEG,
-    fourcc=cv2.VideoWriter_fourcc(*'FFV1'),
-    fps=fps,
-    frameSize=(width, height),
-    params=[
-            cv2.VIDEOWRITER_PROP_DEPTH,
-            cv2.CV_16U,
-            cv2.VIDEOWRITER_PROP_IS_COLOR,
-            0,  # false
-    ],
-)
+    def __init__(self, mada_config_dict):
 
-try:
-  while True:
-    frames = pipe.wait_for_frames()
-    frames = aligned_stream.process(frames)
+        self.image_width = mada_config_dict.get("image_width", 640)  # 848
+        self.image_height = mada_config_dict.get("image_height", 480)
+        self.fps = mada_config_dict.get("fps", 15)  # 30
 
-    depth_frame = frames.get_depth_frame()
-    color_frame = frames.get_color_frame()
+        out_video_dir = "videos"
 
-    depth_image = np.asanyarray(depth_frame.get_data())  # (480, 640) uint16
-    # print("depth", depth_image.shape, depth_image.dtype)
-    color_image = np.asanyarray(color_frame.get_data())
-    # print("color", color_image.shape, color_image.dtype)
+        out_rgb_video_base = "rgb"
+        rgb_videos = glob.glob(os.path.join(out_video_dir, f"{out_rgb_video_base}*.mp4"))
+        next_id = len(rgb_videos)
+        out_rgb_video_path = os.path.join(out_video_dir, f"{out_rgb_video_base}_{next_id}.mp4")
 
-    # Show images
-    cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-    cv2.imshow('RealSense', color_image)
+        out_depth_video_base = "depth"
+        out_depth_video_path = os.path.join(out_video_dir, f"{out_depth_video_base}_{next_id}.mkv")
 
-    rgb_vid_writer.write(color_image)
+        self.rgb_vid_writer = cv2.VideoWriter(
+            out_rgb_video_path,
+            cv2.VideoWriter_fourcc(*'mp4v'),
+            self.fps,
+            (self.image_width, self.image_height)
+        )
 
-    # depth_image = cv2.cvtColor(depth_image, cv2.COLOR_BGR2GRAY)  # hace falta??
-    depth_vid_writer.write(depth_image)
+        self.depth_vid_writer = cv2.VideoWriter(
+            out_depth_video_path,
+            apiPreference=cv2.CAP_FFMPEG,
+            fourcc=cv2.VideoWriter_fourcc(*'FFV1'),
+            fps=self.fps,
+            frameSize=(self.image_width, self.image_height),
+            params=[
+                cv2.VIDEOWRITER_PROP_DEPTH,
+                cv2.CV_16U,
+                cv2.VIDEOWRITER_PROP_IS_COLOR,
+                0,  # false
+            ],
+        )
 
-    key = cv2.waitKey(1)
-    if key == 27:  # ESCAPE
-      break
+    def record_color_and_depth_images(self, color_image, depth_image):
 
-finally:
-    pipe.stop()
+        self.rgb_vid_writer.write(color_image)
 
-    rgb_vid_writer.release()
-    depth_vid_writer.release()
+        # depth_image = cv2.cvtColor(depth_image, cv2.COLOR_BGR2GRAY)  # hace falta??
+        self.depth_vid_writer.write(depth_image)
 
-    cv2.destroyAllWindows()
+    def stop(self):
 
-# depth_image = depth_image[depth_image < 10000]
-# plt.hist(depth_image, bins=100)
-# plt.show()
+        self.rgb_vid_writer.release()
+        self.depth_vid_writer.release()
+
+
+def record_color_and_depth_videos_loop(mada_config_dict):
+
+    camera = RealSenseCamera(mada_config_dict)
+
+    video_recorder = VideoRecorder(mada_config_dict)
+
+    try:
+        while True:
+
+            color_image, depth_image = camera.get_color_and_depth_images()
+
+            # Show images
+            cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
+            cv2.imshow('RealSense', color_image)
+
+            video_recorder.record_color_and_depth_images(color_image, depth_image)
+
+            key = cv2.waitKey(1)
+            if key == 27:  # ESCAPE
+                break
+
+    finally:
+        camera.stop()
+        video_recorder.stop()
+
+        cv2.destroyAllWindows()
+
+    # depth_image = depth_image[depth_image < 10000]
+    # plt.hist(depth_image, bins=100)
+    # plt.show()
+
+
+if __name__ == "__main__":
+
+    mada_file = "object_detector.yaml"
+    with open(mada_file) as file:
+        mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
+
+    record_color_and_depth_videos_loop(mada_config_dict)

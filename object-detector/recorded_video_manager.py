@@ -51,9 +51,6 @@ class RecordedVideoManager:
         self.init_frame = mada_config_dict.get("init_frame", 0)
         self.sleep_time = mada_config_dict.get("sleep_time", 0)
 
-        # from mm to m; used for the depth image
-        self.factor = 1000
-
     def get_color_and_depth_images(self):
 
         print(f"\n[FRAME] {self.n_frame}")

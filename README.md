@@ -64,12 +64,27 @@ implement speech recognition in the cell phone, in the same Kotlin app as the sp
 It uses the built-in capabilities of the Android cell phone.
 
 ### Driver Agent
-Next figure shows the Driver Agent structure with an example of use (TODO) 
+Next figure shows the Driver Agent structure with an example of use.
 
-(TODO) AÑADIR EJEMPLO DE USO DE DRIVER AGENT
 <img src="assets/driver_agent.png" alt="Driver Agent structure" width="900" height="500" />
 
- There are two types of actions:
+**A** The Object Detector continuosly scans RGB images from the camera in order to detect MADA objects:
+people, vehicles, traffic signs, traffic lights. When a MADA object is detected and tracked, a Space event is generated
+in the Driver Agent's Memory, consisting of the detected class name, the trackId, the bounding box and the distance to the camera.
+
+**B** Speed measurements are periodically collected from the GPS in the cell phone and sent to the server in the computer, 
+where they are stored in the Driver Agent’s Memory.
+
+**C** The driver requests if the distance to the vehicle in front is safe; the request is recognized in the cell phone, 
+converted to text and sent to the SLM (Small Language Model) in the Driver Agent's Planner.
+
+**D** The SLM scans the functions available and identifies if there is one that may satisfy the driver request. 
+
+**E, F** This function gets event data from Memory and generates a text that is sent to the TTS; in the example, 
+the function gets the current speed and the distance from the camera to the car in front. Since the distance is lower 
+than the safety distance at the current speed, it recommends the driver to reduce the speed.
+
+There are two types of actions:
 - **automatic actions**: respond to one or more events that correspond to some kind of risk or danger. 
 An example can be warning the driver that current speed is greater than that in a detected speed limit sign.
 - **request motivated actions**: respond to a speech request from the driver. An example could be checking if there is a 
@@ -174,7 +189,7 @@ implements the Planner class, which manages the SLM that supports the **driver r
 the evaluation of both automatic and request initiated actions
 - `memory.py`: contains all class definitions to support the persistence of base objects and events
 - `mada_classes.py`: implements all the classes with the behaviour of specific MADA types: vehicles, people, traffic signs, traffic lights
-- `functions.py`: includes the definition of the functions supporting the actions
+- `functions.py`: includes the definition of the functions supporting the driver assistance actions
 - `functions_schema.py`: automatically generates function schemas by parsing the function definitions in `functions.py`. 
 The schemas are used by the SLM in the Driver Agent's Planner to decide if one of the existing functions must be called. 
 It also contains a FunctionParser class used by the Driver Agent's Planner to parse the JSON output of the SLM in function calling 

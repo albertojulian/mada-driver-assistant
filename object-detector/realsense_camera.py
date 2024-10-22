@@ -6,13 +6,13 @@ class RealSenseCamera:
 
         self.image_width = mada_config_dict.get("image_width", 640)  # 848
         self.image_height = mada_config_dict.get("image_height", 480)
-        fps = mada_config_dict.get("fps", 15)  # 30
+        self.fps = mada_config_dict.get("fps", 15)  # 30
 
         # Configure depth and color streams
         self.pipeline = rs.pipeline()
         config = rs.config()
-        config.enable_stream(rs.stream.depth, self.image_width, self.image_height, rs.format.z16, fps)
-        config.enable_stream(rs.stream.color, self.image_width, self.image_height, rs.format.bgr8, fps)
+        config.enable_stream(rs.stream.depth, self.image_width, self.image_height, rs.format.z16, self.fps)
+        config.enable_stream(rs.stream.color, self.image_width, self.image_height, rs.format.bgr8, self.fps)
 
         pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
         pipeline_profile = config.resolve(pipeline_wrapper)
