@@ -1,33 +1,4 @@
 live : False  # True => camera, False => disk files
-# In case live is False, the following parameters & values are used
-in_video_dir : ../../videos
-in_rgb_video : rgb_5.mp4
-in_depth_video : depth_5.mkv
-init_frame : 3900    # 449, 1107 for give way, 800, 980 for speed limit, 1640 (green pequeño), 2052 (red), 2434 (red to green) traffic light
-sleep_time : 0.5
-
-show_track : False  # if True, image is displayed in model.track
-
-ws_ip : ws://192.168.43.233  # WebSocket server address; IP given by cell phone wi-fi;
-ws_port : 8765  # port selected for web sockets
-
-log : False
-time_between_actions: 5  # to avoid redundant actions about the same object
-only_ahead : True
-
-# yolo_model : yolov8m.pt    # v0.1
-# yolo_model : yolov8m_redu_e20_best.pt
-yolo_model : yolov8m_redu_e40_best.pt
-
-mada_class_names : ['bicycle', 'bus', 'car', 'construction', 'cycles crossing', 'dead end street',
-                    'give way', 'go left', 'go right', 'motorcycle', 'no entry', 'no left turn', 'no overtaking',
-                    'no priority', 'no right turn', 'pedestrian crossing', 'person', 'roundabout',
-                    'school crossing', 'speed limit', 'stop', 'traffic light', 'truck']
-
-score_thresh : 0.5
-
-speed_limits : [20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
-traffic_light_threshold_perc : 0.04    # below this percentaje the traffic light is considered off
 
 # camera parameters
 image_width : 640  # See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
@@ -35,6 +6,34 @@ image_height : 480  # See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
 fps : 6  # frames per second. Some values: 6, 15, 25, 30... See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
 
 max_distance_from_camera : 7  # maximum distance that the camera can reliably detect
+
+# In case live is False, the following parameters & values are used
+in_video_dir : ../../videos
+in_rgb_video : rgb_5.mp4
+in_depth_video : depth_5.mkv
+init_frame : 2052    # 449, 1107 for give way, 800, 980 for speed limit, 1640 (green pequeño), 2052 (red), 2434 (red to green) traffic light
+sleep_time : 0
+
+show_track : False  # if True, image is displayed in model.track
+
+ws_ip : ws://192.168.43.233  # WebSocket server address; IP given by cell phone wi-fi;
+ws_port : 8765  # port selected for web sockets
+
+log : False
+
+# yolo_model : yolov8m.pt    # v0.1
+yolo_model : yolov8m_redu_e20_best.pt
+# yolo_model : yolov8m_redu_e40_best.pt
+
+mada_class_names : ['bicycle', 'bus', 'car', 'construction', 'cycles crossing', 'dead end street',
+                    'give way', 'go left', 'go right', 'motorcycle', 'no entry', 'no left turn', 'no overtaking',
+                    'no priority', 'no right turn', 'pedestrian crossing', 'person', 'roundabout',
+                    'school crossing', 'speed limit', 'stop', 'traffic light', 'truck']
+
+score_thresh : 0.5  # only classes with a greater score are considered
+
+speed_limits : [20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
+traffic_light_threshold_ratio : 0.04    # below this ratio of light pixels/total pixels, the traffic light is considered off
 
 # android_wifi : AndroidAJR
 object_detector_connection_error : Object Detector connection error; check if phone wi-fi is shared, Mac is connected to it and websockets server is on

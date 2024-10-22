@@ -22,9 +22,6 @@ mada_file = "driver_agent.yaml"
 with open(mada_file) as file:
     mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
-# time between actions: avoids redundant actions about the same object
-TIME_BETWEEN_ACTIONS = mada_config_dict.get("time_between_actions", 2)
-
 
 class DriverAgent:
 

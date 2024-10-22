@@ -3,7 +3,6 @@ ws_port : 8765  # port selected for web sockets
 
 log : False
 time_between_actions: 5  # to avoid redundant actions about the same object
-only_ahead : True
 
 android_wifi : AndroidAJR
 mac_connected_and_phone_app : Mac is connected to Android phone wi-fi. Start speed and voice app.

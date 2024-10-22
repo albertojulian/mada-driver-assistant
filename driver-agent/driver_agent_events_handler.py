@@ -139,7 +139,7 @@ if __name__ == "__main__":
     status_ok = check_mac_wifi_connection()
 
     if status_ok:
-        print("\n<<<<<<<<<<<< Starting WebSockets Server >>>>>>>>>>>>\n")
+        print("\n<<<<<<<<<<<< Starting Driver Agent Events Handler >>>>>>>>>>>>\n")
 
         ws_port = mada_config_dict.get("ws_port", 8765)
         start_server = websockets.serve(handle_events, "0.0.0.0", ws_port)  # port to listen websockets
