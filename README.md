@@ -64,6 +64,39 @@ implement speech recognition in the cell phone, in the same Kotlin app as the sp
 It uses the built-in capabilities of the Android cell phone.
 
 ### Driver Agent
+
+The Driver Agent contains two modules: Memory and Planner
+
+**Memory**
+
+It enables the persistence of objects and events:
+- MadaObject: all the types that can be detected by the object detector: vehicle, person, traffic light, traffic sign. 
+Defined by an object type and a track id (which remains in successive frames to uniquely identify the object instance)
+- SpaceEvent: attribute of a mada object instance. Defined by a bounding box, a position (left, front, right, 
+depending on the center of the bounding box) and the distance to the camera
+- SpeedEvent: stores the speed measured by the GPS in the cell phone
+- ActionEvent: mainly used to avoid repeating the same action over the same object too soon 
+
+**Planner**
+
+The Planner leverages on a Small Language Model powered with basic **function-calling**, which is the ability that 
+some LLMs and SLMs have to identify which function (from a given list) may be called to satisfy a driver request. 
+The SLM currently used is Gemma2, which provides acceptable function-calling by default.
+
+**Action types**
+
+There are two types of actions:
+- **automatic actions**: respond to one or more events that correspond to some kind of risk or danger. 
+An example can be warning the driver that current speed is greater than that in a detected speed limit sign.
+- **request motivated actions**: respond to a speech request from the driver. An example could be checking if there is a 
+safety distance from a bus in front. Those requests are sent to an SLM in the Planner which can select a function to be called.
+
+### Text To speech
+Text-to-speech functionality is currently very simple: 
+- a call to Google's gtts service, which takes a text and delivers an audio file of the spoken text
+- a call to macOS `afplay` command, which takes an audio file and plays it
+
+### Driver Agent Usage example
 Next figure shows the Driver Agent structure with an example of use.
 
 <img src="assets/driver_agent.png" alt="Driver Agent structure" width="900" height="500" />
@@ -80,33 +113,9 @@ converted to text and sent to the SLM (Small Language Model) in the Driver Agent
 
 **D** The SLM scans the functions available and identifies if there is one that may satisfy the driver request. 
 
-**E, F** This function gets event data from Memory and generates a text that is sent to the TTS; in the example, 
-the function gets the current speed and the distance from the camera to the car in front. Since the distance is lower 
-than the safety distance at the current speed, it recommends the driver to reduce the speed.
-
-There are two types of actions:
-- **automatic actions**: respond to one or more events that correspond to some kind of risk or danger. 
-An example can be warning the driver that current speed is greater than that in a detected speed limit sign.
-- **request motivated actions**: respond to a speech request from the driver. An example could be checking if there is a 
-safety distance from a bus in front. Those requests are sent to an SLM in the Planner which can select a function to be called.
-
-### Memory
-It enables the persistence of objects and events:
-- MadaObject: all the types that can be detected by the object detector: vehicle, person, traffic light, traffic sign. 
-Defined by an object type and a track id (which remains in successive frames to uniquely identify the object instance)
-- SpaceEvent: attribute of a mada object instance. Defined by a bounding box, a position (left, front, right, depending on the center of the bounding box)
-- SpeedEvent: attribute oe memory
-- ActionEvent: mainly used to avoid repeating the same action over the same object too soon 
-
-### Planner
-The Planner leverages on a Small Language Model powered with basic **function-calling**, which is the ability that 
-some LLMs and SLMs have to identify which function (from a given list) may be called to satisfy a driver request. 
-The SLM currently used is Gemma2, which provides acceptable function-calling by default.
-
-### Text To speech
-Text-to-speech functionality is currently very simple: 
-- a call to Google's gtts service, which takes a text and delivers an audio file of the spoken text
-- a call to macOS `afplay` command, which takes an audio file and plays it
+**E, F** This function gets event data from Memory and generates a text that is sent to the TTS to be converted to audio. 
+In the example, the function gets the current speed and the distance from the camera to the car in front. Since the distance 
+is lower than the safety distance at the current speed, it recommends the driver to reduce the speed.
 
 ## Datasets
 The current version of MADA's Object Detector is a customization of the YOLO v8 Object Detector model, fine-tuned with 
