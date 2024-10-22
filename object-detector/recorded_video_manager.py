@@ -5,7 +5,7 @@ import os
 from time import sleep
 import numpy as np
 
-class StoredVideoManager:
+class RecordedVideoManager:
 
     def __init__(self, mada_config_dict):
 

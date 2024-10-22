@@ -153,22 +153,27 @@ messages to the webSockets server in the computer. The Accelerometer and Gyrosco
 
 ### object-detector
 Contains the following python files:
-- `object_detector.py`: implements object detection and tracking; it also applies character recognition (through PaddleOCR) 
-to the speed limit signs bounding boxes. In "live" mode it captures the RGB and Depth images from the camera; otherwise, it takes them from videos.
-- `record_rgb_and_depth_videos.py`: records RGB and depth videos to support changes in the object detector indoor without having to connect the camera.
+- `object_detection_loop.py`: implements the object detection and tracking loop; in "live" mode it captures the RGB and Depth images 
+from the camera; otherwise, it takes them from recorded videos.
+- `realsense_camera.py`: implements the RealSenseCamera class, which wraps all the RealSense camera code.
+- `recorded_video_manager.py`: implements the RecordedVideoManager, which manages offline recorded videos.
+- `object_detector.py`: it also applies character recognition (through PaddleOCR) to the speed limit signs bounding boxes.
+- `record_rgb_and_depth_videos.py`: records RGB and depth videos to test changes in the object detector indoor without having to use the camera outdoor.
 
 It also contains other files used by the python files:
-- `yolov8m.pt`: base model used by the object detector
+- `yolov8m_.pt`: customized model used by the object detector
 - `object_detector.yaml`: contains the configuration parameters that are used by the python functions and classes in the object-detector folder
 
 ### driver-agent
 Contains the following python files:
-- `websockets_server.py`: implements a webSockets server that receives websocket messages from the processing modules 
-(apps in the cell phone and object detector in the computer) and converts them into events to be stored and processed
+- `driver_agent_events_handler.py`: implements the driver agent events handler through a webSockets server that receives 
+websocket messages from the processing modules (apps in the cell phone and object detector in the computer) and converts 
+them into events to be stored and processed
 - `driver_agent.py`: implements the DriverAgent class, which contains as attributes the Memory and Planner classes; 
 implements the Planner class, which manages the SLM that supports the **driver request initiated actions**; it also performs 
 the evaluation of both automatic and request initiated actions
-- `memory.py`: contains all class definitions to support the persistence of objects and events
+- `memory.py`: contains all class definitions to support the persistence of base objects and events
+- `mada_classes.py`: implements all the classes with the behaviour of specific MADA types: vehicles, people, traffic signs, traffic lights
 - `functions.py`: includes the definition of the functions supporting the actions
 - `functions_schema.py`: automatically generates function schemas by parsing the function definitions in `functions.py`. 
 The schemas are used by the SLM in the Driver Agent's Planner to decide if one of the existing functions must be called. 

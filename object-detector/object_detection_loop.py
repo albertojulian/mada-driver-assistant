@@ -9,7 +9,7 @@ import websockets
 import asyncio
 import yaml
 from realsense_camera import RealSenseCamera
-from stored_video_manager import StoredVideoManager
+from recorded_video_manager import RecordedVideoManager
 from object_detector import ObjectDetector
 import sys; sys.path.append("../common")
 from text_to_speech import text_to_speech
@@ -34,7 +34,7 @@ async def detect_and_track_objects():
 
     else:
         # LIVE is False => Get images from two disc files: .mp4 for RGB, .mkv for DEPTH
-        video_device = StoredVideoManager(mada_config_dict)
+        video_device = RecordedVideoManager(mada_config_dict)
 
     image_width = video_device.image_width
     image_height = video_device.image_height
