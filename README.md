@@ -15,9 +15,9 @@ MADA can also be described as "agentic" because, although it has the components 
 (sensors, memory, planner, actions; hence the name of the Driver Agent module), it is not yet as functional to really be considered a complete Agent.
 
 Regarding hardware, MADA is based on (and limited by) the following components I have at home:
-- an Intel Realsense D435i camera (which captures RGB and depth images)
-- a Samsung cell phone
-- an Apple M1 computer with (just) 8 GB of RAM
+- Intel Realsense D435i camera (which captures RGB and depth images)
+- Samsung cell phone
+- Apple M1 computer with (just) 8 GB of RAM
 
 ## Functional blocks
 MADA is composed of several sensors and processing modules:
@@ -101,7 +101,7 @@ Next figure shows the Driver Agent structure with an example of use.
 
 <img src="assets/driver_agent.png" alt="Driver Agent structure" width="900" height="500" />
 
-**A** The Object Detector continuosly scans RGB images from the camera in order to detect MADA objects:
+**A** The Object Detector scans RGB images at a given frame rate from the camera in order to detect MADA objects:
 people, vehicles, traffic signs, traffic lights. When a MADA object is detected and tracked, a Space event is generated
 in the Driver Agent's Memory, consisting of the detected class name, the trackId, the bounding box and the distance to the camera.
 

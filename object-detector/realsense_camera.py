@@ -38,7 +38,8 @@ class RealSenseCamera:
         color_image = np.asanyarray(color_frame.get_data())
         depth_image = np.asanyarray(depth_frame.get_data())
 
-        return color_image, depth_image
+        skip_frame = False  # for compatibility with RecordedVideoManager
+        return skip_frame, color_image, depth_image
 
     def stop(self):
 

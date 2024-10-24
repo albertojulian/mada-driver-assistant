@@ -1,7 +1,7 @@
 # detection: 23 classes, including COCO (person, car, bus, bicycle, truck, traffic light), speed limit, give way, etc
 # track
 # If LIVE == True, read from camera Intel Realsense
-# If LIVE == False, read color and depth videos from "grabar color y depth alineados uint16"
+# If LIVE == False, read color and depth videos recorded with "record_rgb_and_depth_videos.py"
 # TTS
 
 import cv2
@@ -48,13 +48,17 @@ async def detect_and_track_objects():
                 if websocket is None or websocket.closed:
                     websocket = await websockets.connect(uri)
 
-                color_image, depth_image = video_device.get_color_and_depth_images()
-                if color_image is None:
+                skip_frame, color_image, depth_image = video_device.get_color_and_depth_images()
+                if skip_frame is True:
                     continue
 
-                space_event_message = object_detector.detection_and_tracking(color_image, depth_image)
+                if color_image is None:
+                    print("Ending detection loop: no color image\n")
+                    break
 
-                if space_event_message != "":
+                space_event_messages = object_detector.detection_and_tracking(color_image, depth_image)
+
+                for space_event_message in space_event_messages:
                     await websocket.send(space_event_message)
 
                 # Show images
@@ -67,13 +71,13 @@ async def detect_and_track_objects():
                     break
 
             except websockets.ConnectionClosedError as e:
-                print(f"Connection closed: {e}. Retrying in 3 seconds...")
+                print(f"Connection closed: {e}. Retrying in 1 second...")
                 websocket = None
-                await asyncio.sleep(3)  # Wait before trying to reconnect
+                await asyncio.sleep(1)  # Wait before trying to reconnect
 
             except Exception as e:
-                connection_error = mada_config_dict.get("object_detector_connection_error", "Object Detector connection error")
-                text_to_speech(connection_error)
+                object_detector_unknown_error = mada_config_dict.get("object_detector_unknown_error", "Object Detector or connection error")
+                text_to_speech(object_detector_unknown_error)
                 break
 
     finally:

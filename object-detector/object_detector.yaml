@@ -1,4 +1,4 @@
-live : True  # True => camera, False => disk files
+live : False  # True => camera, False => disk files
 
 # camera parameters
 image_width : 640  # See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
@@ -9,10 +9,11 @@ max_distance_from_camera : 7  # maximum distance that the camera can reliably de
 
 # In case live is False, the following parameters & values are used
 in_video_dir : ../../videos
-in_rgb_video : rgb_5.mp4
-in_depth_video : depth_5.mkv
-init_frame : 2052    # 449, 1107 for give way, 800, 980 for speed limit, 1640 (green pequeño), 2052 (red), 2434 (red to green) traffic light
-sleep_time : 0
+# in_rgb_video : rgb_5.mp4
+in_rgb_video : v01_20_traffic_light_all_colors.mp4  # rgb_5.mp4
+# in_rgb_video : v01_20_yellow_traffic_light.mp4
+init_frame : 0    # 449, 1107 for give way, 800, 980 for speed limit, 1640 (green pequeño), 2052 (red), 2434 (red to green) traffic light
+sleep_time : 0    # how much time (s) a frame is displayed; debug purpose
 
 show_track : False  # if True, image is displayed in model.track
 
@@ -33,8 +34,17 @@ mada_class_names : ['bicycle', 'bus', 'car', 'construction', 'cycles crossing', 
 score_thresh : 0.5  # only classes with a greater score are considered
 
 speed_limits : [20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
-traffic_light_threshold_ratio : 0.04    # below this ratio of light pixels/total pixels, the traffic light is considered off
+traffic_light_threshold_ratio : 0.03    # below this ratio of light pixels/total 1/3 pixels, the traffic light is considered off
+
+red_H_lower1 : 0
+red_H_upper1 : 9
+red_H_lower2 : 170
+red_H_upper2 : 180    # H standard is circular: 0-360; in OpenCV is normalized to 0-180 => upper2 (180) == lower1 (0)
+yellow_H_lower : 8
+yellow_H_upper : 35
+green_H_lower : 40
+green_H_upper : 90
 
 # android_wifi : AndroidAJR
-object_detector_connection_error : Object Detector connection error; check if phone wi-fi is shared, Mac is connected to it and websockets server is on
+object_detector_unknown_error : Object Detector or connection error; check if phone wi-fi is shared, Mac is connected to it and websockets server is on
 

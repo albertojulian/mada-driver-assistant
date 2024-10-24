@@ -383,7 +383,7 @@ class Stop(MadaObject):
 class TrafficLight(MadaObject):
 
     def __init__(self, params, init_time):
-        self.traffic_light_color = []
+        self.traffic_light_colors = []
 
         super().__init__(params, init_time)
 
@@ -391,40 +391,41 @@ class TrafficLight(MadaObject):
         # call MadaObject manage_space_event method
         space_event = super().manage_space_event(params, log)
         object_position = space_event.object_position
-
+        # n_frame = params["N_FRAME"]  # TODO borrar
         traffic_light_color = params["TRAFFIC_LIGHT_COLOR"]
+        # print(f"DA n_frame {n_frame}, traffic_light_color {traffic_light_color}")  # TODO borrar
 
         if traffic_light_color == "off":  # avoid storing "off" light state
             return
 
         if traffic_light_color == "red":
             # on red start or red from not red
-            if len(self.traffic_light_color) == 0 or self.traffic_light_color[-1] != "red":
+            if len(self.traffic_light_colors) == 0 or self.traffic_light_colors[-1] != "red":
                 output_message = f"Stop, {traffic_light_color} {self.class_name} {object_position}"
                 self.add_action_event(params, output_message)
                 space_event2tts(output_message)
 
         elif traffic_light_color == "green":
             # on green start or green from not green
-            if len(self.traffic_light_color) == 0 or self.traffic_light_color[-1] != "green":
+            if len(self.traffic_light_colors) == 0 or self.traffic_light_colors[-1] != "green":
                 output_message = f"You can go on, {traffic_light_color} {self.class_name} {object_position}"
                 self.add_action_event(params, output_message)
                 space_event2tts(output_message)
 
         else:    # yellow
             # on yellow start or yellow from red (pedestrians may cross)
-            if len(self.traffic_light_color) == 0 or self.traffic_light_color[-1] == "red":
+            if len(self.traffic_light_colors) == 0 or self.traffic_light_colors[-1] == "red":
                 output_message = f"Warning, pedestrians may cross, {traffic_light_color} {self.class_name} {object_position}"
                 self.add_action_event(params, output_message)
                 space_event2tts(output_message)
 
             # on yellow from green (reduce speed)
-            elif self.traffic_light_color[-1] == "green":
+            elif self.traffic_light_colors[-1] == "green":
                 output_message = f"Reduce speed, {traffic_light_color} {self.class_name} {object_position}"
                 self.add_action_event(params, output_message)
                 space_event2tts(output_message)
 
-        self.traffic_light_color.append(traffic_light_color)
+        self.traffic_light_colors.append(traffic_light_color)
 
 
 class Truck(MadaObject):
