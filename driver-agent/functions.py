@@ -113,7 +113,7 @@ def get_vehicle_instance(vehicle_types, position):
 
     memory = get_memory()
     # objects_list is browsed in reverse order: from most recent
-    for object in memory.objects_list[::-1]:
+    for object in memory.mada_objects_list[::-1]:
         if object.class_name in vehicle_types:
             # space event list is browsed in reverse order: from most recent
             for space_event in object.space_events[::-1]:
