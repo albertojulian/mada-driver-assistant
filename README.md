@@ -86,9 +86,9 @@ The SLM currently used is Gemma2, which provides acceptable function-calling by 
 **Action types**
 
 There are two types of actions:
-- **automatic actions**: respond to one or more events that correspond to some kind of risk or danger. 
+- **event driven actions**: respond to one or more events that correspond to some kind of risk or danger. 
 An example can be warning the driver that current speed is greater than that in a detected speed limit sign.
-- **request motivated actions**: respond to a speech request from the driver. An example could be checking if there is a 
+- **driver request initiated actions**: respond to a speech request from the driver. An example could be checking if there is a 
 safety distance from a bus in front. Those requests are sent to an SLM in the Planner which can select a function to be called.
 
 ### Text To speech
@@ -96,10 +96,17 @@ Text-to-speech functionality is currently very simple:
 - a call to Google's gtts service, which takes a text and delivers an audio file of the spoken text
 - a call to macOS `afplay` command, which takes an audio file and plays it
 
-### Driver Agent Usage example
-Next figure shows the Driver Agent structure with an example of use.
+### Driver Agent Usage example: event driven action
+(TODO)
+Next figure shows the Driver Agent structure with an example of use, an event action triggered by a detection of a speed limit sign.
 
-<img src="assets/driver_agent.png" alt="Driver Agent structure" width="800" height="450" />
+<img src="assets/driver_agent_speed_limit.png" alt="Driver Agent structure" width="800" height="450" />
+
+
+### Driver Agent Usage example: driver request initiated action
+Next figure shows another example of use, a driver request initiated action.
+
+<img src="assets/driver_agent_safety_distance.png" alt="Driver Agent structure" width="800" height="450" />
 
 **A** The Object Detector scans RGB images at a given frame rate from the camera in order to detect MADA objects:
 people, vehicles, traffic signs, traffic lights. When a MADA object is detected and tracked, a Space event is generated
@@ -111,11 +118,15 @@ where they are stored in the Driver Agent’s Memory.
 **C** The driver requests if the distance to the vehicle in front is safe; the request is recognized in the cell phone, 
 converted to text and sent to the SLM (Small Language Model) in the Driver Agent's Planner.
 
-**D** The SLM scans the functions available and identifies if there is one that may satisfy the driver request. 
+**D** The SLM scans the functions available and identifies one that may satisfy the driver request: 
+`check_safety_distance_from_vehicle`
 
-**E, F** This function gets event data from Memory and generates a text that is sent to the TTS to be converted to audio. 
-In the example, the function gets the current speed and the distance from the camera to the car in front. Since the distance 
-is lower than the safety distance at the current speed, it recommends the driver to reduce the speed.
+**E** The function executes the function `get_vehicle_instance` to get the car's space event data (which includes the position 
+and the distance), the function `get_current_speed` and the function `get_safety_distance` for current speed.
+
+**F** With the previous data, the function checks that the distance to the car in front is lower than the safety distance 
+at the current speed, and generates a text recommending the driver to reduce the speed. The text is sent to the TTS to be 
+converted to audio.
 
 ## Datasets
 The current version of MADA's Object Detector is a customization of the YOLO v8 Object Detector model, fine-tuned with 
