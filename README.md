@@ -99,7 +99,7 @@ Text-to-speech functionality is currently very simple:
 ### Driver Agent Usage example
 Next figure shows the Driver Agent structure with an example of use.
 
-<img src="assets/driver_agent.png" alt="Driver Agent structure" width="800" height="400" />
+<img src="assets/driver_agent.png" alt="Driver Agent structure" width="800" height="450" />
 
 **A** The Object Detector scans RGB images at a given frame rate from the camera in order to detect MADA objects:
 people, vehicles, traffic signs, traffic lights. When a MADA object is detected and tracked, a Space event is generated
