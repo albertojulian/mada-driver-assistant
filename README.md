@@ -97,10 +97,23 @@ Text-to-speech functionality is currently very simple:
 - a call to macOS `afplay` command, which takes an audio file and plays it
 
 ### Driver Agent Usage example: event driven action
-(TODO)
+
 Next figure shows the Driver Agent structure with an example of use, an event action triggered by a detection of a speed limit sign.
 
 <img src="assets/driver_agent_speed_limit.png" alt="Driver Agent structure" width="800" height="450" />
+
+**A** Speed measurements are periodically collected from the GPS in the cell phone and sent to the server in the computer, 
+where they are stored as speed events in the Driver Agent’s Memory.
+
+**B** The Object Detector scans RGB images at a given frame rate from the camera in order to detect MADA objects:
+people, vehicles, traffic signs, traffic lights. When a MADA object is detected and tracked, a Space event is generated
+as attribute of the MADA object, consisting of the detected class name, the trackId, the bounding box and the distance to the camera.
+In this case, the Object Detector has detected a 20 km/h speed limit sign. A SpeedLimit object is created and a Space Event is added.
+
+**C** The `manage_space_event` method calls the function `get_current_speed`.
+
+**D** The method verifies that current speed is greater than the speed limit, therefore it generates a text recommending 
+the driver to reduce the speed. The text is sent to the TTS to be converted to audio.
 
 
 ### Driver Agent Usage example: driver request initiated action
@@ -110,10 +123,10 @@ Next figure shows another example of use, a driver request initiated action.
 
 **A** The Object Detector scans RGB images at a given frame rate from the camera in order to detect MADA objects:
 people, vehicles, traffic signs, traffic lights. When a MADA object is detected and tracked, a Space event is generated
-in the Driver Agent's Memory, consisting of the detected class name, the trackId, the bounding box and the distance to the camera.
+as attribute of the MADA object, consisting of the detected class name, the trackId, the bounding box and the distance to the camera.
 
 **B** Speed measurements are periodically collected from the GPS in the cell phone and sent to the server in the computer, 
-where they are stored in the Driver Agent’s Memory.
+where they are stored as speed events in the Driver Agent’s Memory.
 
 **C** The driver requests if the distance to the vehicle in front is safe; the request is recognized in the cell phone, 
 converted to text and sent to the SLM (Small Language Model) in the Driver Agent's Planner.
@@ -121,12 +134,13 @@ converted to text and sent to the SLM (Small Language Model) in the Driver Agent
 **D** The SLM scans the functions available and identifies one that may satisfy the driver request: 
 `check_safety_distance_from_vehicle`
 
-**E** The function executes the function `get_vehicle_instance` to get the car's space event data (which includes the position 
-and the distance), the function `get_current_speed` and the function `get_safety_distance` for current speed.
+**E** The function calls the function `get_vehicle_instance` to get the car's space event data (which includes the position 
+and the distance), the function `get_current_speed` and the function `get_safety_distance` (with current speed as parameter).
 
 **F** With the previous data, the function checks that the distance to the car in front is lower than the safety distance 
 at the current speed, and generates a text recommending the driver to reduce the speed. The text is sent to the TTS to be 
 converted to audio.
+
 
 ## Datasets
 The current version of MADA's Object Detector is a customization of the YOLO v8 Object Detector model, fine-tuned with 
