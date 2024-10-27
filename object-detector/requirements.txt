@@ -1,9 +1,9 @@
 gTTS==2.5.1
 lapx==0.5.7  # required by ultralytics
 mycroft_mimic3_tts==0.2.4  # tts when gtts fails (usually due to no coverage, as in a tunnel)
-pyrealsense2-macosx==2.54.2
-ultralytics==8.2.2  # v0.1
-# ultralytics==8.3.10  # for yolo11
-websockets==11.0.3
-paddlepaddle==??   # required by paddleocr, but not installed with "pip install paddleocr"
 paddleocr==2.8.1  # OCR for MADA version > v0.1
+paddlepaddle   # required by paddleocr, but not installed with "pip install paddleocr"
+pyrealsense2-macosx==2.54.2
+# ultralytics==8.2.2  # v0.1
+ultralytics==8.3.10  # v0.2; required if yolo11 is used
+websockets==11.0.3
