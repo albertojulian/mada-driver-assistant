@@ -295,19 +295,37 @@ cd driver-agent; pip install -r requirements.txt
 
 
 ## Execution instructions
-- In the Cell Phone: turn on GPS and Shared Connection
+- In the Cell Phone: 
+  - turn on GPS and Shared Connection
 - In the Computer:
   - connect the camera to the computer
   - link to the cell phone wi-fi
   - open a terminal
-    - enter the virtual environment with the Driver Agent packages
+    - activate the virtual environment with the Driver Agent packages: 
+       ```
+       conda activate DRIVER_AGENT
+       ```
     - run the ollama model
        ```
        ollama run gemma2:2b
        ```
-    - run the websockets server (which starts the Driver Agent): `python websocket_server.py`
-  - open another terminal, enter the virtual environment with the Object packages and run the Object Detector: `sudo python object_detector.py`
-- In the Cell Phone: start the SpeedVoice and AccelGyro apps
+    - run the Driver Agent events handler: 
+       ```
+       cd driver-agent
+       python driver_agent_events_handler.py
+       ```
+  - open another terminal
+    - activate the virtual environment with the Object Detector packages
+       ```
+       conda activate OBJECT_DETECTOR
+       ```
+    - run the Object Detector: 
+       ```
+       cd object-detector
+       sudo python object_detection_loop.py
+       ```
+- In the Cell Phone: 
+  - start the SpeedVoice (and AccelGyro) app
 
 ## Future work
 - Fine-tune the SLM model to enable more specific and complex requests
