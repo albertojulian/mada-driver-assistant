@@ -55,13 +55,14 @@ Intel Realsense D435i is 0.1 – 3 meters, although still has quiet accuracy up 
 it would be better to have a camera with a range up to 20 meters or so.
 
 ### Speed estimation 
-The speed is provided by a Kotlin app in the cell phone that takes it from the GPS.
+There are several functionalities that leverage on the car speed. The speed is periodically provided by a Kotlin app in 
+the cell phone that takes it from the GPS.
 
 ### Speech recognition
-Speech recognition was initially performed in the Mac by running whisper.cpp in stream mode. 
-However, the execution required 1 GB of RAM, thus I decided to
-implement speech recognition in the cell phone, in the same Kotlin app as the speed estimation. 
-It uses the built-in capabilities of the Android cell phone.
+The driver can interact with MADA through spoken requests, which are recognised and converted into text. Speech recognition 
+was initially performed in the Mac by running whisper.cpp in stream mode. 
+However, the execution required 1 GB of RAM, thus I decided to implement speech recognition in the cell phone, 
+in the same Kotlin app as the speed estimation. It uses the built-in capabilities of the Android cell phone.
 
 ### Driver Agent
 
