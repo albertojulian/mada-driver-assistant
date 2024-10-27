@@ -6,7 +6,7 @@ Among the functionalities provided by MADA are:
 for the current speed, MADA warns with an audio message.
 - **speed assistance**: When a speed limit traffic sign is detected, and the estimated speed is greater than the speed limit, 
 MADA warns with an audio message.
-- **person or traffic light warning**: When a person or traffic light is detected, it warns the driver.
+- **traffic light warning**: When a traffic light is detected, depending on the current color and the transition, it warns the driver.
 
 ### Why "multimodal" and "agentic"?
 MADA is multimodal because it includes an SLM (Small Language Model) and is surrounded by speech input and output, 
@@ -55,17 +55,19 @@ Intel Realsense D435i is 0.1 – 3 meters, although still has quiet accuracy up 
 it would be better to have a camera with a range up to 20 meters or so.
 
 ### Speed estimation 
-There are several functionalities that leverage on the car speed. The speed is periodically provided by a Kotlin app in 
-the cell phone that takes it from the GPS.
+There are several MADA functionalities that leverage on the car speed. An example is checking the current speed 
+against a speed limit sign and, in case current speed is greater, warn the driver to reduce the speed.
+
+The speed is periodically provided by a Kotlin app in the cell phone that takes it from the GPS.
 
 ### Speech recognition
-The driver can interact with MADA through spoken requests, which are recognised and converted into text. Speech recognition 
-was initially performed in the Mac by running whisper.cpp in stream mode. 
+The driver can interact with MADA through spoken requests, which are recognised and converted into text. 
+
+Speech recognition was initially performed in the Mac by running whisper.cpp in stream mode. 
 However, the execution required 1 GB of RAM, thus I decided to implement speech recognition in the cell phone, 
 in the same Kotlin app as the speed estimation. It uses the built-in capabilities of the Android cell phone.
 
 ### Driver Agent
-
 The Driver Agent contains two modules: Memory and Planner
 
 **Memory**
