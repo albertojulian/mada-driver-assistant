@@ -1,6 +1,9 @@
 # Basic Multimodal Agentic Driver Assistant (MADA)
 
-This MADA project's goal is having a minimum, but as functional as possible, **driver assistant** that works outdoor. 
+MADA project's goal is having a minimum, but as functional as possible, **driver assistant** that works outdoor in real-time. 
+The approach is non-invasive: the only outputs are speech audio warnings or suggestions; there is no intention to take 
+control of the car, just to assist the driver with speech messages.
+
 Among the functionalities provided by MADA are:
 - **safety distance checking**: If there is a vehicle in front, and the current distance is lower than the safety distance 
 for the current speed, MADA warns with an audio message.
@@ -8,7 +11,8 @@ for the current speed, MADA warns with an audio message.
 MADA warns with an audio message.
 - **traffic light warning**: When a traffic light is detected, depending on the current color and the transition, it warns the driver.
 
-### Why "multimodal" and "agentic"?
+**Why "multimodal" and "agentic"?**
+
 MADA is multimodal because it includes an SLM (Small Language Model) and is surrounded by speech input and output, 
 RGB and depth images, speed data, accelerometer and gyroscope coordinates...
 MADA can also be described as "agentic" because, although it has the components that correspond to an Agent 
@@ -19,31 +23,31 @@ Regarding hardware, MADA is based on (and limited by) the following components I
 - Samsung cell phone
 - Apple M1 computer with (just) 8 GB of RAM
 
-## Functional blocks
+## MADA main parts
 MADA is composed of several sensors and processing modules:
-- the **camera** takes RGB and depth images. They are processed by the **Object Detector** in the computer, which detects 
-objects (cars, traffic lights) and provides the object type, the bounding box and the position, along with the mean distance from the camera
+- the **camera** takes color (RGB) and depth images. They are processed by the **Object Detector** in the computer, which detects 
+objects (vehicles, people, traffic signs, traffic lights) and provides the object type, the bounding box and the position, 
+along with the mean distance from the camera
 - the **cell phone** gets the **speed** from the GPS, **recognizes driver speech requests**, gets the coordinates from the 
 **accelerometer** and **gyroscope**, and sends all this data to the computer. On the other hand, the cell phone **provides wi-fi** to the computer.
 
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
-to be stored in the Memory and analyzed in the Planner to assess if some action should be initiated.
-The only outputs are speech audio warnings or suggestions. The approach is non-invasive: there is no intention to take 
-control of the car, just to assist the driver with speech messages.
+to be stored in the Memory and analyzed to assess if some action should be initiated.
 
-Next figure shows the functional blocks of MADA.
+Next figure shows main MADA blocks.
 
 <img src="assets/esquema MADA.png" alt="MADA functional blocks" width="900" height="500" />
 
 ### Object Detector
 The goal of an Object Detection model is to analyze an image and identify which object types, out of a given list, 
 are there in the image (or frame), along with the bounding box of each object. MADA's Object Detector is fine-tuned to detect 
-street objects: vehicles, people, traffic signs and traffic lights. It is based on YOLO v8 Object Detector model.
+street objects: vehicles, people, traffic signs and traffic lights. It is based on YOLO v8 Object Detector model, medium size.
 
 **Object Tracking**
 
 After detection, tracking is performed to keep the objects uniquely identified in successive frames. 
-Tracked objects and their associated space events are memorized in order to enable certain actions.
+Tracked objects and their associated space events are memorized in order to enable certain actions. 
+The tracker is Ultralytics' ByteTracker.
 
 **Distance**
 
@@ -53,6 +57,18 @@ giving an average distance from the camera to the object as a result.
 It is worth mentioning that depth cameras have a confidence range of distances; in the case of the 
 Intel Realsense D435i is 0.1 – 3 meters, although still has quiet accuracy up to 6-7 meters; anyway, 
 it would be better to have a camera with a range up to 20 meters or so.
+
+**Selection of fps (frames per second)**
+
+The camera works in different resolutions (color up to 1920 x 1080 pixels, depth/infrared up to 1280 x 720) and 
+6, 15, 30, ... up to 300 fps (depending on the camera resolution). 
+
+At 30 fps, the available time to process a frame is 33 ms (milliseconds); at 15 fps, it is 66 ms. The required time to process 
+a frame in the Object Detector + Tracking is 40-60 ms, thus a frame rate of 15 (or even 30) fps could be acceptable for offline video: 
+it wouldn't process in real-time, but you could record a video of the results in even higher frame rates and play it back in real-time.
+
+However, since **MADA works in real-time**, I use the lowest frame rate, 6 fps; frame transition is not smooth, but 
+the available time per frame is 166 ms, enabling MADA work in real-time.
 
 ### Speed estimation 
 There are several MADA functionalities that leverage on the car speed. An example is checking the current speed 
@@ -73,7 +89,7 @@ The Driver Agent contains two modules: Memory and Planner
 **Memory**
 
 It enables the persistence of objects and events:
-- MadaObject: all the types that can be detected by the object detector: vehicle, person, traffic light, traffic sign. 
+- MadaObject: this is the base class for all the types that can be detected by the object detector: vehicle, person, traffic light, traffic sign. 
 Defined by an object type and a track id (which remains in successive frames to uniquely identify the object instance)
 - SpaceEvent: attribute of a mada object instance. Defined by a bounding box, a position (left, front, right, 
 depending on the center of the bounding box) and the distance to the camera
@@ -96,7 +112,7 @@ safety distance from a bus in front. Those requests are sent to an SLM in the Pl
 
 ### Text To speech
 Text-to-speech functionality is currently very simple: 
-- a call to Google's gtts service, which takes a text and delivers an audio file of the spoken text
+- a call to Google's gtts remote service, which takes a text and delivers an audio file of the spoken text
 - a call to macOS `afplay` command, which takes an audio file and plays it
 
 ### Driver Agent Usage example: event driven action
@@ -113,7 +129,7 @@ people, vehicles, traffic signs, traffic lights. When a MADA object is detected 
 as attribute of the MADA object, consisting of the detected class name, the trackId, the bounding box and the distance to the camera.
 In this case, the Object Detector has detected a 20 km/h speed limit sign. A SpeedLimit object is created and a Space Event is added.
 
-**C** The `manage_space_event` method calls the function `get_current_speed`.
+**C** MADA object's `manage_space_event` method calls the function `get_current_speed`.
 
 **D** The method verifies that current speed is greater than the speed limit, therefore it generates a text recommending 
 the driver to reduce the speed. The text is sent to the TTS to be converted to audio.
@@ -169,7 +185,8 @@ The merging of images and annotations from different datasets was finalised in t
 
 Initially, I considered each speed limit as a separate type; since it is difficult to get a balanced number images from all speed limits, 
 it was also difficult to make the YOLO model detect them properly: the confusion matrix showed there were frequent inter-speed limit errors. 
-Then I decided to merge all the speed limits into just one type and apply an OCR to the bounding box image.
+Then I decided to merge all the speed limits into just one type and apply an OCR (Optical Craracter Recognition) to the bounding box image.
+The package I use is PaddleOCR.
 
 **Traffic lights transitions**
 
@@ -206,10 +223,10 @@ messages to the webSockets server in the computer. The Accelerometer and Gyrosco
 ### object-detector
 Contains the following python files:
 - `object_detection_loop.py`: implements the object detection and tracking loop; in "live" mode it captures the RGB and Depth images 
-from the camera; otherwise, it takes them from recorded videos.
+from the camera; otherwise, it takes them from recorded videos (I use them to test indoor changes in the object detector).
+- `object_detector.py`: it implements the object detector and tracker; it also applies OCR to the speed limit signs bounding boxes.
 - `realsense_camera.py`: implements the RealSenseCamera class, which wraps all the RealSense camera code.
-- `recorded_video_manager.py`: implements the RecordedVideoManager, which manages offline recorded videos.
-- `object_detector.py`: it also applies character recognition (through PaddleOCR) to the speed limit signs bounding boxes.
+- `recorded_video_manager.py`: implements the RecordedVideoManager, which manages offline recorded videos (I use them to test indoor changes in the object detector).
 - `record_rgb_and_depth_videos.py`: records RGB and depth videos to test changes in the object detector indoor without having to use the camera outdoor.
 
 It also contains other files used by the python files:
@@ -322,7 +339,7 @@ cd driver-agent; pip install -r requirements.txt
        ```
        conda activate OBJECT_DETECTOR
        ```
-    - run the Object Detector: 
+    - run the Object Detection loop: 
        ```
        cd object-detector
        sudo python object_detection_loop.py

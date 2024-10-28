@@ -155,7 +155,7 @@ def get_safety_distance(current_speed, safety_time=2, min_distance=2):
 
 
 def main1():
-    current_speed_l = [0, 5, 13, 15, 20, 30, 120]
+    current_speed_l = [0, 5, 13, 15, 20, 30, 40, 120]
 
     for current_speed in current_speed_l:
         safety_distance = get_safety_distance(current_speed)
