@@ -1,4 +1,4 @@
-live : True  # True => camera, False => recorded video files
+live : False  # True => camera, False => recorded video files
 
 # camera parameters
 image_width : 640  # See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
@@ -17,6 +17,7 @@ log : False
 # yolo_model : yolov8m.pt    # v0.1
 yolo_model : yolov8m_redu_e20_best.pt
 # yolo_model : yolov8m_redu_e40_best.pt
+roboflow_model : traffic-signs-redu/3
 
 mada_class_names : ['bicycle', 'bus', 'car', 'construction', 'cycles crossing', 'dead end street',
                     'give way', 'go left', 'go right', 'motorcycle', 'no entry', 'no left turn', 'no overtaking',
@@ -42,8 +43,8 @@ object_detector_unknown_error : Object Detector or connection error; check if ph
 
 # In case live is False, the following parameters & values are used
 in_video_dir : ../../videos
-# in_rgb_video : rgb_5.mp4
-in_rgb_video : v01_20_traffic_light_all_colors.mp4  # rgb_5.mp4
+in_rgb_video : rgb_5.mp4
+# in_rgb_video : v01_20_traffic_light_all_colors.mp4  # rgb_5.mp4
 # in_rgb_video : v01_20_yellow_traffic_light.mp4
 init_frame : 0    # rgb_5.mp4: 449, 1107 for give way, 800, 980 for speed limit, 1640 (green pequeño), 2052 (red), 2434 (red to green) traffic light
 sleep_time : 0    # how much time (s) a frame is displayed; debug purpose

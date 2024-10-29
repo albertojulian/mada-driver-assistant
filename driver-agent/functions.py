@@ -1,10 +1,10 @@
 import yaml
 from typing import Literal
-import threading
 from memory import get_memory
 import sys
 sys.path.append("../common")
-from text_to_speech import text_to_speech
+from text_to_speech import text_to_speech, text_to_speech_async
+from utils import get_most_frequent_value
 
 
 mada_file = "driver_agent.yaml"
@@ -70,7 +70,9 @@ def check_safety_distance_from_vehicle(vehicle=None, space_event=None, report_al
 
     vehicle_distance = space_event.object_distance
 
-    max_distance = mada_config_dict.get("max_distance_from_camera", 6)
+    max_distance = mada_config_dict.get("max_distance_from_camera", 6)  # maximum distance that the camera can reliably detect
+    speed_threshold = mada_config_dict.get("speed_threshold", 5)  # in km/h; minimum to check safety distance
+
     if vehicle_distance > max_distance:
         output_message = f"{vehicle_type} {position} is more than {max_distance} meters away, which is the camera limit"
     else:
@@ -82,20 +84,18 @@ def check_safety_distance_from_vehicle(vehicle=None, space_event=None, report_al
         else:
             safety_distance = get_safety_distance(current_speed)
 
-            if vehicle_distance < safety_distance and current_speed > 0:
+            if vehicle_distance < safety_distance and current_speed > speed_threshold:
                 output_message = f"Reduce the speed. {output_message}, but safety distance is {safety_distance} meters."
                 too_close = True
             else:
                 output_message += f"You can keep the speed. {output_message}, and safety distance is {safety_distance} meters."
 
-    if report_always:  # execute from stt => llm => function calling
+    if report_always:  # executed from stt => llm => function calling
         print(f"[ACTION] Output message: {output_message}")
         text_to_speech(output_message)
     elif too_close is True:
         print(f"[ACTION] Output message: {output_message}")
-        audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
-        # Start audio in a separate thread
-        audio_thread.start()
+        text_to_speech_async(output_message)
 
     return too_close, output_message
 
@@ -152,6 +152,28 @@ def get_safety_distance(current_speed, safety_time=2, min_distance=2):
     safety_distance = max(safety_distance, min_distance)
 
     return safety_distance
+
+
+def get_last_speed_limit_sign(tts=True):
+    memory = get_memory()
+
+    # objects_list is browsed in reverse order: from most recent
+    for object in memory.mada_objects_list[::-1]:
+        if object.class_name == "speed limit":
+            if len(object.speed_limits) > 0:
+                speed_limit = get_most_frequent_value(object.speed_limits)
+                speed_limit_str = f"{speed_limit} km/h"
+                if tts:
+                    output_message = f"Speed limit is {speed_limit_str}"
+                    text_to_speech_async(output_message)
+
+                return speed_limit, speed_limit_str
+
+    if tts:
+        output_message = f"No speed limit sign has been well detected"
+        text_to_speech_async(output_message)
+
+    return None, None
 
 
 def main1():

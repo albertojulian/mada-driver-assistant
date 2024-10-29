@@ -1,6 +1,6 @@
 from gtts import gTTS, tts as gtts
 from time import time
-
+from collections import Counter
 # pip install mycroft-mimic3-tts[all]  # Removing [all] will install support for English only.
 import subprocess
 import yaml
@@ -86,6 +86,13 @@ def is_int(str):
         return 1
     except ValueError:
         return 0
+
+
+def get_most_frequent_value(items_list):
+    items_count = Counter(items_list)
+    most_frequent_value = items_count.most_common(1)[0][0]
+    return most_frequent_value
+
 
 def main1():
     file = "../Small Language Models AJR/0 traffic docs/dh-chapter3.pdf"

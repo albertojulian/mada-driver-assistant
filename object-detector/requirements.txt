@@ -1,9 +1,14 @@
 gTTS==2.5.1
+inference==0.24.0   # Roboflow
 lapx==0.5.7  # required by ultralytics
+librosa==0.10.2.post1  # modifies audio speed without modifying frequency
 mycroft_mimic3_tts==0.2.4  # tts when gtts fails (usually due to no coverage, as in a tunnel)
+opencv-python>=4.8.1.78,<4.10.0.85  # 4.10.0.84; problem with inference and opencv installed by conda
 paddleocr==2.8.1  # OCR for MADA version > v0.1
 paddlepaddle   # required by paddleocr, but not installed with "pip install paddleocr"
+pydub==0.25.1
 pyrealsense2-macosx==2.54.2
+sounddevice==0.5.1
 # ultralytics==8.2.2  # v0.1
 ultralytics==8.3.10  # v0.2; required if yolo11 is used
 websockets==11.0.3

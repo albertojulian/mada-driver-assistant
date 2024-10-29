@@ -4,6 +4,7 @@ from functions import check_safety_distance_from_vehicle, get_current_speed
 import sys
 sys.path.append("../common")
 from text_to_speech import text_to_speech_async
+from utils import is_int, get_most_frequent_value
 
 
 mada_file = "driver_agent.yaml"
@@ -337,7 +338,7 @@ class SchoolCrossing(MadaObject):
 class SpeedLimit(MadaObject):
 
     def __init__(self, params, init_time):
-        self.speed_limit = []
+        self.speed_limits = []
 
         super().__init__(params, init_time)
 
@@ -346,12 +347,16 @@ class SpeedLimit(MadaObject):
         space_event = super().manage_space_event(params, log)
         object_position = space_event.object_position
 
-        # report only once
-        if len(self.action_events) == 0:
+        speed_limit = params.get("SPEED_LIMIT", None)
 
-            speed_limit = params.get("SPEED_LIMIT", None)
+        if speed_limit is not None and is_int(speed_limit):
+            speed_limit = int(speed_limit)
+            self.speed_limits.append(speed_limit)
 
-            if speed_limit is not None:
+            # report only once and when more than 2 speed limit frames have been detected
+            if len(self.speed_limits) > 2 and len(self.action_events) == 0:
+                speed_limit = get_most_frequent_value(self.speed_limits)
+
                 current_speed, current_speed_str = get_current_speed(tts=False)
 
                 if current_speed is None:
@@ -454,3 +459,4 @@ def space_event2tts(output_message):
     if memory.listen_mode is False:
 
         text_to_speech_async(output_message)
+

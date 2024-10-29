@@ -2,7 +2,7 @@
 
 MADA project's goal is having a minimum, but as functional as possible, **driver assistant** that works outdoor in real-time. 
 The approach is non-invasive: the only outputs are speech audio warnings or suggestions; there is no intention to take 
-control of the car, just to assist the driver with speech messages.
+control of the car, just to assist the driver with audio messages.
 
 Among the functionalities provided by MADA are:
 - **safety distance checking**: If there is a vehicle in front, and the current distance is lower than the safety distance 
@@ -61,14 +61,15 @@ it would be better to have a camera with a range up to 20 meters or so.
 **Selection of fps (frames per second)**
 
 The camera works in different resolutions (color up to 1920 x 1080 pixels, depth/infrared up to 1280 x 720) and 
-6, 15, 30, ... up to 300 fps (depending on the camera resolution). 
+different camera rates: 6, 15, 30, ... up to 300 fps (depending on the camera resolution). 
 
-At 30 fps, the available time to process a frame is 33 ms (milliseconds); at 15 fps, it is 66 ms. The required time to process 
-a frame in the Object Detector + Tracking is 40-60 ms, thus a frame rate of 15 (or even 30) fps could be acceptable for offline video: 
-it wouldn't process in real-time, but you could record a video of the results in even higher frame rates and play it back in real-time.
+At 30 fps, the available time to process a frame is 33 ms (milliseconds); at 15 fps, it is 66 ms. On the other hand, 
+the required time to process a frame in the Object Detector + Tracking is 40-60 ms, thus a frame rate of 15 (or even 30) fps 
+could be acceptable for offline video: it wouldn't process in real-time, but you could record a video of the results 
+in even higher frame rates and play it back in real-time.
 
-However, since **MADA works in real-time**, I use the lowest frame rate, 6 fps; frame transition is not smooth, but 
-the available time per frame is 166 ms, enabling MADA work in real-time.
+However, since **MADA works in real-time**, I use the lowest frame rate, **6 fps**; frame transition visual perception is 
+not smooth, but the available time to process a frame is 166 ms, enabling MADA work in real-time.
 
 ### Speed estimation 
 There are several MADA functionalities that leverage on the car speed. An example is checking the current speed 
@@ -76,7 +77,7 @@ against a speed limit sign and, in case current speed is greater, warn the drive
 
 The speed is periodically provided by a Kotlin app in the cell phone that takes it from the GPS.
 
-### Speech recognition
+### Speech recognition (or Speech to Text)
 The driver can interact with MADA through spoken requests, which are recognised and converted into text. 
 
 Speech recognition was initially performed in the Mac by running whisper.cpp in stream mode. 
@@ -110,10 +111,12 @@ An example can be warning the driver that current speed is greater than that in 
 - **driver request initiated actions**: respond to a speech request from the driver. An example could be checking if there is a 
 safety distance from a bus in front. Those requests are sent to an SLM in the Planner which can select a function to be called.
 
-### Text To speech
-Text-to-speech functionality is currently very simple: 
-- a call to Google's gtts remote service, which takes a text and delivers an audio file of the spoken text
-- a call to macOS `afplay` command, which takes an audio file and plays it
+### Text to Speech
+Text to Speech functionality is currently very simple: 
+- a call to Google's gtts remote service, which takes a text and delivers an audio file of the spoken text. 
+In case of non-coverage, gtts does not work, and the TTS functionality request is rerouted to the local package 
+mycroft_mimic3_tts, which is a bit slower than gtts.
+- a call to macOS `afplay` command, which takes an audio file and plays it.
 
 ### Driver Agent Usage example: event driven action
 
@@ -242,7 +245,8 @@ them into events to be stored and processed
 implements the Planner class, which manages the SLM that supports the **driver request initiated actions**; it also performs 
 the evaluation of both automatic and request initiated actions
 - `memory.py`: contains all class definitions to support the persistence of base objects and events
-- `mada_classes.py`: implements all the classes with the behaviour of specific MADA types: vehicles, people, traffic signs, traffic lights
+- `mada_classes.py`: implements all the classes (which inherit from the base class MadaObject) with the behaviour of 
+specific MADA types: vehicles, people, traffic signs, traffic lights
 - `functions.py`: includes the definition of the functions supporting the driver assistance actions
 - `functions_schema.py`: automatically generates function schemas by parsing the function definitions in `functions.py`. 
 The schemas are used by the SLM in the Driver Agent's Planner to decide if one of the existing functions must be called. 

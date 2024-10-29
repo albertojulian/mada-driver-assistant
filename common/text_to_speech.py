@@ -3,11 +3,14 @@ import subprocess
 import os
 from time import time, sleep
 
-# import sounddevice as sd
+import sounddevice as sd
 import numpy as np
-import wave
+# import wave
 import io
 import threading
+import librosa
+import soundfile as sf
+# from pydub import AudioSegment
 
 # pip install mycroft-mimic3-tts[all]  # Removing [all] will install support for English only.
 
@@ -18,7 +21,7 @@ def text_to_speech_async(output_message):
     audio_thread.start()
 
 
-def text_to_speech(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
+def text_to_speech2(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
 
     if print_message:
         print("\n<<<<<<<<<<< Printing audio message >>>>>>>>>>>>>>")
@@ -83,7 +86,7 @@ def create_gtts_connection_error_audio():
         shutil.copy("tts_out.mp3", "gtts_connection_error.mp3")
 
 
-def text_to_speech2(message, audio_speed=1.75, print_message=True, lang='en'):
+def text_to_speech(message, audio_speed=1.75, print_message=True, lang='en'):
 
     if print_message:
         print("\n<<<<<<<<<<< Printing audio message >>>>>>>>>>>>>>")
@@ -96,6 +99,7 @@ def text_to_speech2(message, audio_speed=1.75, print_message=True, lang='en'):
         audio_data = mimic3_tts(message)
 
     if audio_data:
+        audio_data = change_audio_speed(audio_data, audio_speed)
         play_audio(audio_data)
     else:
         print("No se pudo generar el audio con ninguna opción")
@@ -113,7 +117,7 @@ def gtts_tts(message, lang="en"):
         tts.write_to_fp(audio_data)
         audio_data.seek(0)  # Reinicia el puntero
 
-        audio_data = convert_mp3_to_wav(audio_data)
+        # audio_data = convert_mp3_to_wav(audio_data)
 
         return audio_data
 
@@ -131,26 +135,27 @@ def mimic3_tts(message):
         print(f"Error con Mimic3: {e}")
         return None
 
+def change_audio_speed(audio_data, speed=1.75):
+    # Cargar el audio desde el flujo de bytes
+    audio_data.seek(0)
+    y, sample_rate = librosa.load(audio_data, sr=None)
+
+    # Ajustar la velocidad sin cambiar el tono
+    y_stretched = librosa.effects.time_stretch(y, rate=speed)
+
+    # Almacenar el audio modificado en un flujo de bytes
+    modified_audio_data = io.BytesIO()
+    sf.write(modified_audio_data, y_stretched, sample_rate, format="wav")
+    modified_audio_data.seek(0)  # Reinicia el puntero
+    return modified_audio_data
+
 
 def play_audio(audio_data):
-    with wave.open(audio_data, 'rb') as wf:
-        sample_rate = wf.getframerate()
-        num_channels = wf.getnchannels()
-        audio_frames = wf.readframes(wf.getnframes())
-        audio_array = np.frombuffer(audio_frames, dtype=np.int16)
-
-        if num_channels > 1:
-            audio_array = audio_array.reshape(-1, num_channels)
-
+    with sf.SoundFile(audio_data) as sf_file:
+        audio_array = sf_file.read(dtype="float32")
+        sample_rate = sf_file.samplerate
         sd.play(audio_array, samplerate=sample_rate)
         sd.wait()
-
-
-def convert_mp3_to_wav(mp3_data):
-    process = subprocess.Popen(['ffmpeg', '-i', 'pipe:0', '-f', 'wav', 'pipe:1'],
-                               stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    wav_data, _ = process.communicate(input=mp3_data.read())
-    return io.BytesIO(wav_data)
 
 
 def main1():
@@ -166,8 +171,14 @@ def main1():
     # 10 repeticiones de una palabra tardan 21.95s de mimic3 (local) y 12 de gtts (internet por móvil)
 
 
+def main2():
+    message = "Speed limit is 50 km/h"
+    text_to_speech(message)
+
+
 if __name__ == "__main__":
 
     # create_gtts_connection_error_audio()
     # check_tts()
-    main1()
+    # main1()
+    main2()

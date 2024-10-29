@@ -95,7 +95,9 @@ class Planner:
             # ... Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)"
             os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-        functions_list = ["check_safety_distance_from_vehicle", "get_current_speed"]
+        # TODO: conf file
+        # functions_list = ["check_safety_distance_from_vehicle", "get_current_speed"]
+        functions_list = ["check_safety_distance_from_vehicle", "get_current_speed", "get_last_speed_limit_sign"]
 
         self.functions_schemas = gather_functions_schema(functions, functions_list)
         functions_schemas_str = str(self.functions_schemas)
