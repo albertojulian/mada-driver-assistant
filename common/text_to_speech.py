@@ -2,15 +2,11 @@ from gtts import gTTS, tts as gtts
 import subprocess
 import os
 from time import time, sleep
-
 import sounddevice as sd
-import numpy as np
-# import wave
 import io
 import threading
-import librosa
 import soundfile as sf
-# from pydub import AudioSegment
+from pyrubberband import pyrb
 
 # pip install mycroft-mimic3-tts[all]  # Removing [all] will install support for English only.
 
@@ -21,7 +17,7 @@ def text_to_speech_async(output_message):
     audio_thread.start()
 
 
-def text_to_speech2(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
+def text_to_speech_afplay(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
 
     if print_message:
         print("\n<<<<<<<<<<< Printing audio message >>>>>>>>>>>>>>")
@@ -135,24 +131,24 @@ def mimic3_tts(message):
         print(f"Error con Mimic3: {e}")
         return None
 
-def change_audio_speed(audio_data, speed=1.75):
+def change_audio_speed(audio_data, speed=1.75, librosa_stretch=True):
     # Cargar el audio desde el flujo de bytes
     audio_data.seek(0)
-    y, sample_rate = librosa.load(audio_data, sr=None)
+    data, sample_rate = sf.read(audio_data)
 
     # Ajustar la velocidad sin cambiar el tono
-    y_stretched = librosa.effects.time_stretch(y, rate=speed)
+    data_stretched = pyrb.time_stretch(data, sample_rate, rate=speed, rbargs=None)
 
     # Almacenar el audio modificado en un flujo de bytes
     modified_audio_data = io.BytesIO()
-    sf.write(modified_audio_data, y_stretched, sample_rate, format="wav")
+    sf.write(modified_audio_data, data_stretched, sample_rate, format="wav")
     modified_audio_data.seek(0)  # Reinicia el puntero
     return modified_audio_data
 
 
 def play_audio(audio_data):
     with sf.SoundFile(audio_data) as sf_file:
-        audio_array = sf_file.read(dtype="float32")
+        audio_array = sf_file.read(dtype="int16")
         sample_rate = sf_file.samplerate
         sd.play(audio_array, samplerate=sample_rate)
         sd.wait()
@@ -162,7 +158,7 @@ def main1():
     start_time = time()
     message = "Your"  # speed is 70 kilometers per hour, but limit is 90. You can increase speed
     for _ in range(10):
-        text_to_speech2(message)
+        text_to_speech(message)
 
     end_time = time()
     process_time = end_time - start_time
@@ -173,8 +169,8 @@ def main1():
 
 def main2():
     message = "Speed limit is 50 km/h"
+    text_to_speech_afplay(message)
     text_to_speech(message)
-
 
 if __name__ == "__main__":
 

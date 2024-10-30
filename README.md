@@ -60,7 +60,7 @@ it would be better to have a camera with a range up to 20 meters or so.
 
 **Selection of fps (frames per second)**
 
-The camera works in different resolutions (color up to 1920 x 1080 pixels, depth/infrared up to 1280 x 720) and 
+The D435i camera may work in different resolutions (color up to 1920 x 1080 pixels, depth/infrared up to 1280 x 720) and 
 different camera rates: 6, 15, 30, ... up to 300 fps (depending on the camera resolution). 
 
 At 30 fps, the available time to process a frame is 33 ms (milliseconds); at 15 fps, it is 66 ms. On the other hand, 
@@ -68,8 +68,8 @@ the required time to process a frame in the Object Detector + Tracking is 40-60 
 could be acceptable for offline video: it wouldn't process in real-time, but you could record a video of the results 
 in even higher frame rates and play it back in real-time.
 
-However, since **MADA works in real-time**, I use the lowest frame rate, **6 fps**; frame transition visual perception is 
-not smooth, but the available time to process a frame is 166 ms, enabling MADA work in real-time.
+However, since **MADA works in real-time**, I use the lowest frame rate, **6 fps**. With this rate, frame transition visual perception is 
+not smooth, but the available time to process a frame is 166 ms, which enables MADA to work in real-time.
 
 ### Speed estimation 
 There are several MADA functionalities that leverage on the car speed. An example is checking the current speed 

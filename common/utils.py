@@ -89,8 +89,12 @@ def is_int(str):
 
 
 def get_most_frequent_value(items_list):
-    items_count = Counter(items_list)
-    most_frequent_value = items_count.most_common(1)[0][0]
+    if isinstance(items_list, list) and len(items_list) > 0:
+        items_count = Counter(items_list)
+        most_frequent_value = items_count.most_common(1)[0][0]
+    else:
+        most_frequent_value = None
+
     return most_frequent_value
 
 
