@@ -13,6 +13,16 @@ from recorded_video_manager import RecordedVideoManager
 from object_detector import ObjectDetector
 import sys; sys.path.append("../common")
 from text_to_speech import text_to_speech
+import argparse
+
+def parse_arguments():
+
+    ap = argparse.ArgumentParser()
+
+    ap.add_argument("-l", "--live", action="store_true", help="Flag to force using the camera no matter yaml option")
+
+    return ap.parse_args()
+
 
 async def detect_and_track_objects():
 
@@ -20,7 +30,11 @@ async def detect_and_track_objects():
     with open(mada_file) as file:
         mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
-    LIVE = mada_config_dict.get("live", False)
+    live_from_yaml = mada_config_dict.get("live", False)
+
+    args = parse_arguments()
+
+    live = live_from_yaml if args.live is False else True
 
     ws_ip = mada_config_dict.get("ws_ip", "ws://192.168.43.233)")
     ws_port = mada_config_dict.get("ws_port", 8765)
@@ -28,12 +42,12 @@ async def detect_and_track_objects():
 
     websocket = None
 
-    if LIVE is True:
+    if live is True:
         # Get images from camera
         video_device = RealSenseCamera(mada_config_dict)
 
     else:
-        # LIVE is False => Get images from two disc files: .mp4 for RGB, .mkv for DEPTH
+        # live is False => Get images from two recorded files: .mp4 for RGB, .mkv for DEPTH
         video_device = RecordedVideoManager(mada_config_dict)
 
     image_width = video_device.image_width

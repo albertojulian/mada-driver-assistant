@@ -1,4 +1,4 @@
-live : True  # True => camera, False => recorded video files
+live : False  # True => camera, False => recorded video files
 
 # camera parameters
 image_width : 640  # See "rs-enumerate-devices modos y resoluciones x y z.xlsx"
