@@ -36,7 +36,7 @@ to be stored in the Memory and analyzed to assess if some action should be initi
 
 Next figure shows main MADA blocks.
 
-<img src="assets/esquema MADA.png" alt="MADA functional blocks" width="900" height="500" />
+<img src="assets/esquema_MADA.png" alt="MADA functional blocks" width="900" height="500" />
 
 ### Object Detector
 The goal of an Object Detection model is to analyze an image and identify which object types, out of a given list, 
