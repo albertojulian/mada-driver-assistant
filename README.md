@@ -171,8 +171,8 @@ images and annotations (when available) from several datasets:
 for MADA: person, car, bus, bicycle, truck, motorcycle.
 - **GTSDB (German Traffic Sign Detection Benchmark)**: composed of images and annotations of more than 40 traffic sign classes, 
 and some of them have been selected for MADA: speed limits, stop, give way, roundabout, pedestrian crossing...
-- **DFG-TSD (DFG Traffic Sign Dataset; DFG is a Slovenian company)**: includes more than 200 traffic sign classes, 
-from which some have been selected to complement those less represented in GTSDB or not included: some speed limits, 
+- **DFG-TSD (DFG Traffic Sign Dataset; DFG is a Slovenian company)**: includes more than 200 Traffic sign classes, 
+some of which have been selected to complement those less represented in GTSDB or not included: some speed limits, 
 dead end street, no left turn, no right turn, no priority.
 - **S2TLD (SJTU Small Traffic Light Detection; SJTU is Shanghai Jiao Tong University)**: provides traffic light images 
 and annotations, with separate types for red, green and yellow lights.
@@ -181,8 +181,9 @@ and annotations, with separate types for red, green and yellow lights.
 
 Since images from each of the datasets might have non-annotated instances of classes considered only in another dataset 
 (for instance, the images in the S2TLD dataset have only annotations of traffic lights, but there are also non-annotated 
-cars, crossing people and traffic signs), I had to review the whole dataset to add annotations (labels and bounding boxes) for the non-annotated instances.
-The merging of images and annotations from different datasets was finalised in the **Roboflow platform**.
+cars, crossing people and traffic signs), I had to review the whole dataset to add annotations (labels and bounding boxes) 
+for the non-annotated instances. The merging of images and annotations (and the additions) from different datasets was done 
+in the **Roboflow platform**.
 
 **Speed limit signs and OCR**
 
@@ -197,12 +198,14 @@ Initially, there were separate types for red, green and yellow lights. However, 
 transitions between lights as states inside the same traffic light instance; for example, green to yellow is interpreted as a speed reduction action, 
 while red to yellow is interpreted as a pedestrian crossing warning, both inside the same traffic light instance.
 Therefore, I decided to merge the 3 traffic light types into one, where the state corresponds to the color which is
-assigned by applying classic computer vision techniques to the bounding box image.
+assigned by applying classic image processing techniques to the bounding box image.
 
 ### Final dataset
 
 After the speed limits and traffic lights mergings, the resulting dataset is composed of **3160 training images** and 
 **750 validation images**, and the corresponding label files which totalize a **minimum of 200 annotations of 23 different image classes**.
+
+The dataset is available in https://universe.roboflow.com/alberto-julian-7z4dc/mada-driver-assistant-redu.
 
 (TODO) Imagen de las 23 classes (imagen y texto)
 
@@ -331,7 +334,7 @@ cd driver-agent; pip install -r requirements.txt
        ```
     - run the ollama model
        ```
-       ollama run gemma2:2b
+       ollama run gemma2:2b  # then /exit
        ```
     - run the Driver Agent events handler: 
        ```
@@ -355,3 +358,50 @@ cd driver-agent; pip install -r requirements.txt
 - Fine-tune the SLM model to enable more specific and complex requests
 - Provide functionality for the Accelerometer and Gyroscope events
 - Add left and right back cameras to track blind spots, in order to enable detection of vehicles in those directions when trying to move to left or right lane
+
+## References
+**COCO dataset**:
+- [official website](https://cocodataset.org):  https://cocodataset.org/
+- paper:
+```bibtex
+- @article{lin2014microsoft,
+  title={Microsoft COCO: Common Objects in Context},
+  author={Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Hays, James and Perona, Pietro and Ramanan, Deva and Doll{\'a}r, Piotr and Zitnick, C. Lawrence},
+  journal={arXiv preprint arXiv:1405.0312},
+  year={2014}
+}
+```
+
+**GTSDB dataset**:
+```bibtex
+@inproceedings{Houben-IJCNN-2013,
+   author = {Sebastian Houben and Johannes Stallkamp and Jan Salmen and Marc Schlipsing and Christian Igel},
+   booktitle = {International Joint Conference on Neural Networks},
+   title = {Detection of Traffic Signs in Real-World Images: The {G}erman {T}raffic {S}ign {D}etection {B}enchmark},
+   number = {1288},
+   year = {2013},
+}
+```
+
+**DFG-TSD dataset**:
+```bibtex
+@article{Tabernik2019ITS,
+   title = {{Deep Learning for Large-Scale Traffic-Sign Detection and Recognition}},   
+   author = {Tabernik, Domen and Sko{\v{c}}aj, Danijel},
+   journal = {IEEE Transactions on Intelligent Transportation Systems},
+   year = {2019},
+   doi={10.1109/TITS.2019.2913588}, 
+   ISSN={1524-9050}
+}
+```
+
+**S2TLD dataset**:
+```bibtex
+@article{yang2022scrdet++,
+  title={Scrdet++: Detecting small, cluttered and rotated objects via instance-level feature denoising and rotation loss smoothing},
+  author={Yang, Xue and Yan, Junchi and Liao, Wenlong and Yang, Xiaokang and Tang, Jin and He, Tao},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2022},
+  publisher={IEEE}
+}
+```

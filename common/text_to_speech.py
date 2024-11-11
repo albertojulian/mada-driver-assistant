@@ -73,15 +73,6 @@ def check_tts():
         sleep(3)
 
 
-def create_gtts_connection_error_audio():
-
-    message = "gtts connection error. Check if the Mac is connected to internet"
-    gtts_ok = text_to_speech(message)
-    if gtts_ok:
-        import shutil
-        shutil.copy("tts_out.mp3", "gtts_connection_error.mp3")
-
-
 def text_to_speech(message, audio_speed=1.75, print_message=True, lang='en'):
 
     if print_message:
@@ -174,7 +165,6 @@ def main2():
 
 if __name__ == "__main__":
 
-    # create_gtts_connection_error_audio()
     # check_tts()
     # main1()
     main2()

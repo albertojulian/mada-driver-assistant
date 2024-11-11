@@ -1,59 +1,52 @@
-from gtts import gTTS, tts as gtts
-from time import time
 from collections import Counter
-# pip install mycroft-mimic3-tts[all]  # Removing [all] will install support for English only.
 import subprocess
 import yaml
-
 import os
-
+from time import time
+from text_to_speech import text_to_speech
 # pip install PyPDF2
 # from PyPDF2 import PdfReader
 
 # pip install pdfminer.six
 # from pdfminer.high_level import extract_text
 
+# Cuando el Mac usa AndroidAJR del móvil, la IP es 192.168.43.233
+# IP del móvil: 192.168.0.11
 
-# Original voices are slow => increase with audio_speed=1.75 as the -r parameter in afplay
-def say_message2(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
+def wifi_info_mac():
+    # Ejecutar el comando `airport` para obtener el SSID
+    result = subprocess.run(
+        ['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-I'],
+        capture_output=True, text=True)
+    output = result.stdout
+    for line in output.split('\n'):
+        if ' SSID' in line:
+            ssid = line.split(":")[1].strip()
+            return ssid
 
-    if print_message:
-        print("\n<<<<<<<<<<< Start printing audio message: ")
-        print(message)
-        print(">>>>>>>>>>>>>> End printing audio message\n")
 
-    # Create the gTTS object with the message
-    # tts = gTTS(message, lang='es')
-    tts = gTTS(message, lang='en')
+def check_mac_wifi_connection():
+    mada_file = "../mada.yaml"
+    with open(mada_file) as file:
+        mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
-    # Save the audio file with the message
-    try:
-        tts.save(audio_file)
-
-        # play the file with the message with Apple's afplay command
-        # Original voices are slow => increase with the -r parameter in afplay
-        # os.system(f"afplay {audio_file} -r {audio_speed}")
-        subprocess.run(f"afplay {audio_file} -r {audio_speed}", shell=True)
-
-        return True
-
-    except gtts.gTTSError:
-        print("#######################################")
-        print("gTTS Connection error; check if the Mac is connected to internet (AndroidAJR)")
-        print("#######################################")
-
-        connection_error_audio_file = "gtts_connection_error.mp3"
-        if os.path.exists(connection_error_audio_file):
-            subprocess.run(f"afplay {connection_error_audio_file} -r {audio_speed}", shell=True)
+    mac_ssid = wifi_info_mac()
+    communications = mada_config_dict["communications"]
+    android_wifi = communications.get("android_wifi", "AndroidAJR")
+    status_ok = False
+    if mac_ssid == android_wifi:
+        mac_connected_and_phone_app = communications.get("mac_connected_and_phone_app", "Connection with phone OK")
+        message = mac_connected_and_phone_app
+        status_ok = True
+    else:
+        if mac_ssid is None:
+            message = "Mac is not connected to any wi-fi"
         else:
-            print(f"Cannot find file {connection_error_audio_file}")
+            message = f"Mac is connected to {mac_ssid} rather than {android_wifi}"
 
+    text_to_speech(message)
 
-def say_message1(message, audio_speed=1.5, audio_file="tts_out.wav"):  # mimic3
-    # mimic3 --voice <voice> "<text>" > output.wav
-
-    subprocess.run(f"mimic3 '{message}' > {audio_file}", shell=True)
-    subprocess.run(f"afplay {audio_file} -r {audio_speed}", shell=True)
+    return status_ok
 
 
 """
@@ -99,6 +92,11 @@ def get_most_frequent_value(items_list):
 
 
 def main1():
+    check_mac_wifi_connection()
+
+
+"""
+def main2():
     file = "../Small Language Models AJR/0 traffic docs/dh-chapter3.pdf"
 
     # drive1_txt = read_pdf_v1(file)
@@ -106,19 +104,10 @@ def main1():
 
     pdf2txt(file)
 
-def main2():
-    start_time = time()
-    message = "Your"  # speed is 70 kilometers per hour, but limit is 90. You can increase speed
-    for _ in range(10):
-        say_message1(message)
+"""
 
-    end_time = time()
-    process_time = end_time - start_time
-    print(round(process_time, 2))
-
-    # 10 repeticiones de una palabra tardan 20 s de mimic3 (local) y 12 de gtts (internet por móvil)
 
 if __name__ == "__main__":
 
-    # main1()
-    main2()
+    main1()
+    # main2()

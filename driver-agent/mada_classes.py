@@ -1,13 +1,12 @@
 from memory import MadaObject, get_memory
 import yaml
 from functions import check_safety_distance_from_vehicle, get_current_speed
-import sys
-sys.path.append("../common")
-from text_to_speech import text_to_speech_async
+import sys; sys.path.append("../common")
+from text_to_speech import text_to_speech, text_to_speech_async
 from utils import is_int, get_most_frequent_value
 
 
-mada_file = "driver_agent.yaml"
+mada_file = "../mada.yaml"
 with open(mada_file) as file:
     mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
@@ -396,9 +395,7 @@ class TrafficLight(MadaObject):
         # call MadaObject manage_space_event method
         space_event = super().manage_space_event(params, log)
         object_position = space_event.object_position
-        # n_frame = params["N_FRAME"]  # TODO borrar
         traffic_light_color = params["TRAFFIC_LIGHT_COLOR"]
-        # print(f"DA n_frame {n_frame}, traffic_light_color {traffic_light_color}")  # TODO borrar
 
         if traffic_light_color == "off":  # avoid storing "off" light state
             return
@@ -458,5 +455,5 @@ def space_event2tts(output_message):
     memory = get_memory()
     if memory.listen_mode is False:
 
-        text_to_speech_async(output_message)
+        text_to_speech(output_message)
 

@@ -9,9 +9,10 @@ class RecordedVideoManager:
 
     def __init__(self, mada_config_dict):
 
-        in_video_dir = mada_config_dict.get("in_video_dir", "../videos")
+        recorded_video = mada_config_dict["recorded_video"]
+        in_video_dir = recorded_video["in_video_dir"]
 
-        in_rgb_video = mada_config_dict.get("in_rgb_video", "rgb_4.mp4")
+        in_rgb_video = recorded_video["in_rgb_video"]
         in_rgb_video_path = os.path.join(in_video_dir, f"{in_rgb_video}")
 
         if not os.path.isfile(in_rgb_video_path):
@@ -48,14 +49,30 @@ class RecordedVideoManager:
 
         print(f"[INFO] Start reading files '{in_rgb_video_path}' and '{in_depth_video_path}'...")
 
+        speed_file = in_rgb_video.replace("rgb", "speed")
+        speed_file = speed_file.replace(".mp4", ".txt")
+        speed_file_path = os.path.join(in_video_dir, speed_file)
+        self.frame_speed = None
+        if os.path.isfile(speed_file_path):
+            with open(speed_file_path) as f:
+                speed_frame_lines = f.readlines()
+            self.frame_speed = {int(speed_frame_line.split()[1]):int(speed_frame_line.split()[0])
+                                for speed_frame_line in speed_frame_lines}
+            print(self.frame_speed)
+
         self.n_frame = 0
-        self.init_frame = mada_config_dict.get("init_frame", 0)
-        self.sleep_time = mada_config_dict.get("sleep_time", 0)
+        self.init_frame = recorded_video.get("init_frame", 0)
+        self.sleep_time = recorded_video.get("sleep_time", 0)
 
     def get_color_and_depth_images(self):
 
         self.n_frame += 1
         print(f"\n[FRAME] {self.n_frame}")
+        if self.frame_speed is not None:
+            self.speed = self.frame_speed.get(self.n_frame, None)
+        else:
+            self.speed = None
+
         rgb_ret_ok, color_image = self.rgb_cap.read()
 
         if self.depth_cap is None:

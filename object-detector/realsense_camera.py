@@ -4,9 +4,10 @@ import numpy as np
 class RealSenseCamera:
     def __init__(self, mada_config_dict):
 
-        self.image_width = mada_config_dict.get("image_width", 640)  # 848
-        self.image_height = mada_config_dict.get("image_height", 480)
-        self.fps = mada_config_dict.get("fps", 15)  # 30
+        camera_conf = mada_config_dict["camera"]
+        self.image_width = camera_conf["image_width"]
+        self.image_height = camera_conf["image_height"]
+        self.fps = camera_conf["fps"]
 
         # Configure depth and color streams
         self.pipeline = rs.pipeline()

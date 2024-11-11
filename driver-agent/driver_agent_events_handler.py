@@ -1,13 +1,5 @@
 # La app móvil informa la velocidad cada x segundos
-# ORDEN:
-# - Activar GPS y Conexion compartida (AndroidAJR) en el móvil
-# - conectar WiFi Mac a AndroidAJR
-# - ejecutar: wss (python websockets_server.py)
-# - ejecutar app móvil SpeedVoiceWebSocket
-# - ejecutar: od (sudo python "object_detector.py")
 
-# Cuando el Mac usa AndroidAJR del móvil, la IP es 192.168.43.233
-# IP del móvil: 192.168.0.11
 # instalo websockets por PyCharm (equivale a pip install websockets)
 import asyncio
 import websockets
@@ -15,44 +7,9 @@ import subprocess
 from driver_agent import get_driver_agent
 import yaml
 from time import time
-import sys
-sys.path.append("../common")
+import sys; sys.path.append("../common")
 from text_to_speech import text_to_speech
-
-
-def wifi_info_mac():
-    # Ejecutar el comando `airport` para obtener el SSID
-    result = subprocess.run(
-        ['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-I'],
-        capture_output=True, text=True)
-    output = result.stdout
-    for line in output.split('\n'):
-        if ' SSID' in line:
-            ssid = line.split(":")[1].strip()
-            return ssid
-
-
-def check_mac_wifi_connection():
-    mada_file = "driver_agent.yaml"
-    with open(mada_file) as file:
-        mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
-
-    mac_ssid = wifi_info_mac()
-    android_wifi = mada_config_dict.get("android_wifi", "AndroidAJR")
-    status_ok = False
-    if mac_ssid == android_wifi:
-        mac_connected_and_phone_app = mada_config_dict.get("mac_connected_and_phone_app", "Connection with phone OK")
-        message = mac_connected_and_phone_app
-        status_ok = True
-    else:
-        mac_not_connected = mada_config_dict.get("mac_not_connected_and_phone_app",
-                                                               "Connection with phone not OK")
-        message = mac_not_connected
-
-    text_to_speech(message)
-
-    return status_ok
-
+from utils import check_mac_wifi_connection
 
 async def handle_events(websocket, path):
     # Agregar la conexión WebSocket a la lista
@@ -112,15 +69,10 @@ async def handle_events(websocket, path):
         connections.remove(websocket)
 
 
-def main1():
-    ssid = wifi_info_mac()
-    print(f"Conectado a la red WiFi: {ssid}")
-
-
 if __name__ == "__main__":
 
     # main1()
-    mada_file = "driver_agent.yaml"
+    mada_file = "../mada.yaml"
     with open(mada_file) as file:
         mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
@@ -131,17 +83,18 @@ if __name__ == "__main__":
     driver_agent = get_driver_agent(log=log)
     init_time = driver_agent.memory.init_time
 
-    phone_connected = mada_config_dict.get("phone_connected", "Android phone is connected")
-    phone_connected_start_object_detector = mada_config_dict.get("phone_connected_start_object_detector",
+    communications = mada_config_dict["communications"]
+    phone_connected = communications.get("phone_connected", "Android phone is connected")
+    phone_connected_start_object_detector = communications.get("phone_connected_start_object_detector",
                                                                  "Start object detector")
-    listening_ack = mada_config_dict.get("listening_ack", "I am listening")
+    listening_ack = communications.get("listening_ack", "I am listening")
 
     status_ok = check_mac_wifi_connection()
 
     if status_ok:
         print("\n<<<<<<<<<<<< Starting Driver Agent Events Handler >>>>>>>>>>>>\n")
 
-        ws_port = mada_config_dict.get("ws_port", 8765)
+        ws_port = communications["ws_port"]
         start_server = websockets.serve(handle_events, "0.0.0.0", ws_port)  # port to listen websockets
         # start_server = websockets.serve(handle_client, "localhost", 8000)
 

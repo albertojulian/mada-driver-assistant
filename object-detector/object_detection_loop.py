@@ -26,19 +26,20 @@ def parse_arguments():
 
 async def detect_and_track_objects():
 
-    mada_file = "object_detector.yaml"
+    mada_file = "../mada.yaml"
     with open(mada_file) as file:
         mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
-    live_from_yaml = mada_config_dict.get("live", False)
+    live_from_yaml = mada_config_dict["live"]
 
     args = parse_arguments()
 
     live = live_from_yaml if args.live is False else True
 
-    ws_ip = mada_config_dict.get("ws_ip", "ws://192.168.43.233)")
-    ws_port = mada_config_dict.get("ws_port", 8765)
-    uri = f"{ws_ip}:{ws_port}"  # WebSocket server address: IP and port
+    communications = mada_config_dict["communications"]
+    ws_ip = communications["ws_ip"]
+    ws_port = communications["ws_port"]
+    uri = f"{ws_ip}:{ws_port}"  # driver agent events handler address: IP and port
 
     websocket = None
 
@@ -75,6 +76,10 @@ async def detect_and_track_objects():
                 for space_event_message in space_event_messages:
                     await websocket.send(space_event_message)
 
+                if hasattr(video_device, "speed") and video_device.speed is not None:
+                    speed_event_message = f"setSpeed {video_device.speed}"
+                    await websocket.send(speed_event_message)
+
                 # Show images
                 if object_detector.show_distance:
                     cv2.namedWindow('MADA RealSense', cv2.WINDOW_AUTOSIZE)
@@ -90,7 +95,7 @@ async def detect_and_track_objects():
                 await asyncio.sleep(1)  # Wait before trying to reconnect
 
             except Exception as e:
-                object_detector_unknown_error = mada_config_dict.get("object_detector_unknown_error", "Object Detector or connection error")
+                object_detector_unknown_error = communications.get("object_detector_unknown_error", "Object Detector or connection error")
                 text_to_speech(object_detector_unknown_error)
                 break
 

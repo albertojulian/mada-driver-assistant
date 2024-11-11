@@ -18,7 +18,7 @@ from text_to_speech import text_to_speech
 # - Use eval() to execute the function if it's a simple expression,
 # - or exec() if it's a statement or requires more flexibility.
 
-mada_file = "driver_agent.yaml"
+mada_file = "../mada.yaml"
 with open(mada_file) as file:
     mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
@@ -86,10 +86,11 @@ class Planner:
 
         print("\n<<<<<<<<<<<< Starting Planner >>>>>>>>>>>>")
 
-        self.llm_type = mada_config_dict.get("llm_type", "mlx")
+        llm = mada_config_dict["llm"]
+        self.llm_type = llm["llm_type"]
 
         if self.llm_type == "mlx":
-            mlx_llm = mada_config_dict.get("mlx_llm", "mlx-community/gemma-2-2b-it-8bit")
+            mlx_llm = llm["mlx_llm"]
             self.llm_model, self.llm_tokenizer = load(mlx_llm)
             # Avoid a HuggingFace tokenizer warning: "huggingface/tokenizers: The current process just got forked ...
             # ... Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)"
@@ -119,8 +120,9 @@ class Planner:
             chat_prompt = self.llm_tokenizer.apply_chat_template(message, tokenize=False)
             llm_response = generate(self.llm_model, self.llm_tokenizer, prompt=chat_prompt, verbose=False)
         else:
+            llm = mada_config_dict["llm"]
             # ollama
-            ollama_llm = mada_config_dict.get("ollama_llm", "gemma2:2b")
+            ollama_llm = llm["ollama_llm"]
             llm_response = ollama.chat(model=ollama_llm, messages=message)
             llm_response = llm_response['message']['content']
 

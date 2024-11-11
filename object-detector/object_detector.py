@@ -14,16 +14,18 @@ class ObjectDetector:
         self.image_width = image_width
         self.image_height = image_height
 
-        self.mada_class_names = mada_config_dict.get("mada_class_names", None)
+        object_detection_model = mada_config_dict["object_detection_model"]
+        self.mada_class_names = object_detection_model["mada_class_names"]
         # mada_class_name2id = {mada_class_names[id]: id for id in range(len(mada_class_names))}
-        self.score_thresh = mada_config_dict.get("score_thresh", 0.8)
+        self.score_thresh = object_detection_model["score_thresh"]
 
         # if show_track True, image is displayed in model.track
-        self.show_track = mada_config_dict.get("show_track", False)
+        self.show_track = object_detection_model.get("show_track", False)
         # else if show_distance True, image is displayed in cv2.imshow (SHOW_DISTANCE is the opposite of SHOW_TRACK)
         self.show_distance = not self.show_track   # either show track id OR distance
 
-        self.max_distance = mada_config_dict.get("max_distance_from_camera", 6)
+        camera_conf = mada_config_dict["camera"]
+        self.max_distance = camera_conf.get("max_distance_from_camera", 6)
 
         # from mm to m; used for the depth image
         self.factor = 1000
@@ -43,23 +45,28 @@ class ObjectDetector:
 
         # self.compute_device = torch.device("cpu")
 
-        yolo_model = mada_config_dict.get("yolo_model", "yolov8m.pt")
+        yolo_model = object_detection_model["yolo_model"]
         self.model = YOLO(yolo_model).to(self.compute_device)
 
         self.paddle_ocr = PaddleOCR(use_angle_cls=False, ocr_version='PP-OCRv4', lang='en', show_log=False)
         # paddle_ocr = PaddleOCR(use_angle_cls=True, lang='en', show_log=False)
 
-        self.speed_limits = mada_config_dict.get("speed_limits", None)
-        self.traffic_light_threshold_ratio = mada_config_dict.get("traffic_light_threshold_ratio", 0.05)
+        speed_conf = mada_config_dict["speed"]
 
-        self.red_H_lower1 = mada_config_dict.get("red_H_lower1", 0)
-        self.red_H_upper1 = mada_config_dict.get("red_H_upper1", 10)
-        self.red_H_lower2 = mada_config_dict.get("red_H_lower2", 170)
-        self.red_H_upper2 = mada_config_dict.get("red_H_upper2", 180)
-        self.yellow_H_lower = mada_config_dict.get("yellow_H_lower", 11)
-        self.yellow_H_upper = mada_config_dict.get("yellow_H_upper", 30)
-        self.green_H_lower = mada_config_dict.get("green_H_lower", 40)
-        self.green_H_upper = mada_config_dict.get("green_H_upper", 90)
+        self.speed_limits = speed_conf["speed_limits"]
+
+        traffic_light_conf = mada_config_dict["traffic_light"]
+        self.traffic_light_threshold_ratio = traffic_light_conf["traffic_light_threshold_ratio"]
+
+        hue_ranges = traffic_light_conf["hue_ranges"]
+        self.red_H_lower1 = hue_ranges["red_H_lower1"]
+        self.red_H_upper1 = hue_ranges["red_H_upper1"]
+        self.red_H_lower2 = hue_ranges["red_H_lower2"]
+        self.red_H_upper2 = hue_ranges["red_H_upper2"]
+        self.yellow_H_lower = hue_ranges["yellow_H_lower"]
+        self.yellow_H_upper = hue_ranges["yellow_H_upper"]
+        self.green_H_lower = hue_ranges["green_H_lower"]
+        self.green_H_upper = hue_ranges["green_H_upper"]
 
     def detection_and_tracking(self, color_image, depth_image, log=True):
         """
@@ -101,7 +108,6 @@ class ObjectDetector:
                     params["CLASS_ID"] = class_id
                     params["CLASS_NAME"] = class_name
                     params["BOUNDING_BOX"] = list(bbox)  # box example: array([314, 166, 445, 302]) => array generates error when decoding
-                    # params["N_FRAME"] = n_frame  # TODO BORRAR; n_frame viene de video_device.n_frame
 
                     if class_name == "traffic light":
                         # color
@@ -151,55 +157,6 @@ class ObjectDetector:
 
         return bbox_image
 
-    def classify_traffic_light_0(self, bbox_image):
-
-        height, width, _ = bbox_image.shape
-
-        # print(f"thresh es {traffic_light_threshold}\n")
-
-        height_part = height // 3
-        part_pixels = height_part * width
-        traffic_light_threshold = int(self.traffic_light_threshold_ratio * part_pixels)
-
-        # Convertir a espacio de color HSV para mejor segmentación
-        hsv = cv2.cvtColor(bbox_image, cv2.COLOR_BGR2HSV)
-
-        # Definir rangos de color para rojo, amarillo y verde
-        # El estándar de Hue es circular: 0 a 360 grados; en OpenCV se normaliza de 0 a 180 (8 bits)
-        # En OpenCV el color rojo está en valores de H de 0-10 y 170-180 (que es el 0) aprox
-        red_lower1 = np.array([self.red_H_lower1, 70, 50])
-        red_upper1 = np.array([self.red_H_upper1, 255, 255])
-        red_lower2 = np.array([self.red_H_lower2, 70, 50])
-        red_upper2 = np.array([self.red_H_upper2, 255, 255])
-
-        yellow_lower = np.array([self.yellow_H_lower, 70, 50])
-        yellow_upper = np.array([self.yellow_H_upper, 255, 255])
-
-        green_lower = np.array([self.green_H_lower, 70, 50])
-        green_upper = np.array([self.green_H_upper, 255, 255])
-
-        # Crear máscaras para cada color
-        mask_red1 = cv2.inRange(hsv, red_lower1, red_upper1)
-        mask_red2 = cv2.inRange(hsv, red_lower2, red_upper2)
-        mask_red = cv2.bitwise_or(mask_red1, mask_red2)
-        mask_yellow = cv2.inRange(hsv, yellow_lower, yellow_upper)
-        mask_green = cv2.inRange(hsv, green_lower, green_upper)
-
-        # Contar píxeles en cada máscara
-        red_count = cv2.countNonZero(mask_red)
-        yellow_count = cv2.countNonZero(mask_yellow)
-        green_count = cv2.countNonZero(mask_green)
-
-        # Determinar el estado basado en el conteo de píxeles
-        counts = {'red': red_count, 'yellow': yellow_count, 'green': green_count}
-        state = max(counts, key=counts.get)
-
-        if counts[state] < traffic_light_threshold:
-            state = "off"
-
-        print("counts ", counts, state)
-
-        return state
 
     def classify_traffic_light(self, bbox_image):
 
@@ -274,68 +231,6 @@ class ObjectDetector:
 
         return state
 
-    def classify_traffic_light2(self, bbox_image):
-
-        # Convertir la imagen de BGR a HSV para trabajar mejor con colores
-        hsv = cv2.cvtColor(bbox_image, cv2.COLOR_BGR2HSV)
-
-        # Definir los rangos de color para cada luz de semáforo en el espacio HSV
-        red_lower = np.array([0, 100, 100])
-        red_upper = np.array([10, 255, 255])
-
-        yellow_lower = np.array([20, 100, 100])
-        yellow_upper = np.array([30, 255, 255])
-
-        green_lower = np.array([50, 100, 100])
-        green_upper = np.array([70, 255, 255])
-
-        # Crear máscaras para los colores rojo, amarillo y verde
-        mask_red = cv2.inRange(hsv, red_lower, red_upper)
-        mask_yellow = cv2.inRange(hsv, yellow_lower, yellow_upper)
-        mask_green = cv2.inRange(hsv, green_lower, green_upper)
-
-        # Aplicar un pequeño recorte lateral para evitar los píxeles claros en los bordes
-        height, width = mask_red.shape
-        margin = int(width * 0.1)  # Recortar el 10% de cada lado
-        mask_red = mask_red[:, margin:width - margin]
-        mask_yellow = mask_yellow[:, margin:width - margin]
-        mask_green = mask_green[:, margin:width - margin]
-
-        # Dividir el bounding box en tercios (superior, central, inferior)
-        top_section_red = mask_red[:height // 3, :]
-        middle_section_red = mask_red[height // 3:2 * height // 3, :]
-        bottom_section_red = mask_red[2 * height // 3:, :]
-
-        top_section_yellow = mask_yellow[:height // 3, :]
-        middle_section_yellow = mask_yellow[height // 3:2 * height // 3, :]
-        bottom_section_yellow = mask_yellow[2 * height // 3:, :]
-
-        top_section_green = mask_green[:height // 3, :]
-        middle_section_green = mask_green[height // 3:2 * height // 3, :]
-        bottom_section_green = mask_green[2 * height // 3:, :]
-
-        # Contar los píxeles blancos en cada sección para cada color
-        top_red_pixels = cv2.countNonZero(top_section_red)
-        middle_red_pixels = cv2.countNonZero(middle_section_red)
-        bottom_red_pixels = cv2.countNonZero(bottom_section_red)
-
-        top_yellow_pixels = cv2.countNonZero(top_section_yellow)
-        middle_yellow_pixels = cv2.countNonZero(middle_section_yellow)
-        bottom_yellow_pixels = cv2.countNonZero(bottom_section_yellow)
-
-        top_green_pixels = cv2.countNonZero(top_section_green)
-        middle_green_pixels = cv2.countNonZero(middle_section_green)
-        bottom_green_pixels = cv2.countNonZero(bottom_section_green)
-
-        # Evaluar en qué sección hay más píxeles para cada color
-        if top_red_pixels > middle_red_pixels and top_red_pixels > bottom_red_pixels:
-            return "red"
-        elif middle_yellow_pixels > top_yellow_pixels and middle_yellow_pixels > bottom_yellow_pixels:
-            return "yellow"
-        elif bottom_green_pixels > top_green_pixels and bottom_green_pixels > middle_green_pixels:
-            return "green"
-        else:
-            return "off"
 
     def resize_to_min_dimension(self, image, target_min_size=60):
         """

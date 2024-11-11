@@ -1,13 +1,12 @@
 import yaml
 from typing import Literal
 from memory import get_memory
-import sys
-sys.path.append("../common")
+import sys; sys.path.append("../common")
 from text_to_speech import text_to_speech, text_to_speech_async
 from utils import get_most_frequent_value
 
 
-mada_file = "driver_agent.yaml"
+mada_file = "../mada.yaml"
 with open(mada_file) as file:
     mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
 
@@ -28,7 +27,9 @@ def check_safety_distance_from_vehicle_v0(vehicle_type: Literal["car", "bus"],
 
         vehicle_distance = space_event.object_distance
 
-        max_distance = mada_config_dict.get("max_distance_from_camera", 6)
+        camera_conf = mada_config_dict["camera"]
+        max_distance = camera_conf.get("max_distance_from_camera", 6)
+
         if vehicle_distance > max_distance:
             output_message = f"{vehicle_type} {position} is more than {max_distance} meters away, which is the camera limit."
         else:
@@ -70,8 +71,11 @@ def check_safety_distance_from_vehicle(vehicle=None, space_event=None, report_al
 
     vehicle_distance = space_event.object_distance
 
-    max_distance = mada_config_dict.get("max_distance_from_camera", 6)  # maximum distance that the camera can reliably detect
-    speed_threshold = mada_config_dict.get("speed_threshold", 5)  # in km/h; minimum to check safety distance
+    camera_conf = mada_config_dict["camera"]
+    max_distance = camera_conf.get("max_distance_from_camera", 6)
+
+    speed_conf = mada_config_dict["speed"]
+    speed_threshold = speed_conf["speed_threshold"]  # in km/h; minimum to check safety distance
 
     if vehicle_distance > max_distance:
         output_message = f"{vehicle_type} {position} is more than {max_distance} meters away, which is the camera limit"
