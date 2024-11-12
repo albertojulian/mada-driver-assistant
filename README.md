@@ -218,6 +218,9 @@ The code is distributed in four folders:
 - **driver-agent**: contains python files implementing the **Driver Agent** module
 - **common**: contains python files for the **Text to speech** module, and other python files used by the other modules
 
+There is also a configuration file, `mada.yaml`, which contains the configuration parameters that are used by the 
+python functions and classes in the object-detector and driver-agent folders.
+
 ### android-apps
 Contains two project folders for two Kotlin apps to be built in Android Studio and installed in an Android cell phone: 
 - **SpeedVoiceWebSocket**: gets the speed from the GPS and transforms the driver speech requests into text; then sends 
@@ -236,8 +239,7 @@ from the camera; otherwise, it takes them from recorded videos (I use them to te
 - `record_rgb_and_depth_videos.py`: records RGB and depth videos to test changes in the object detector indoor without having to use the camera outdoor.
 
 It also contains other files used by the python files:
-- `yolov8m_.pt`: customized model used by the object detector
-- `object_detector.yaml`: contains the configuration parameters that are used by the python functions and classes in the object-detector folder
+- `yolov8m.pt`: customized model used by the object detector
 
 ### driver-agent
 Contains the following python files:
@@ -255,9 +257,6 @@ specific MADA types: vehicles, people, traffic signs, traffic lights
 The schemas are used by the SLM in the Driver Agent's Planner to decide if one of the existing functions must be called. 
 It also contains a FunctionParser class used by the Driver Agent's Planner to parse the JSON output of the SLM in function calling 
 mode and ensure the function exists and is correctly called
-
-It also contains other files used by the python files:
-- `driver_agent.yaml`: contains the configuration parameters that are used by the python functions and classes in the driver-agent folder
 
 ### common
 Contains python files used both by the object detector and the driver agent:
