@@ -11,12 +11,19 @@ for the current speed, MADA warns with an audio message.
 MADA warns with an audio message.
 - **traffic light warning**: When a traffic light is detected, depending on the current color and the transition, it warns the driver.
 
+Next video shows some MADA functionalities:
+
+<a href="https://www.youtube.com/watch?v=IBT4xY5QrCE">
+  <img src="assets/encabezamiento_MADA.png" alt="MADA functional blocks" width="900" height="500" />
+</a>
+
 **Why "multimodal" and "agentic"?**
 
 MADA is multimodal because it includes an SLM (Small Language Model) and is surrounded by speech input and output, 
 RGB and depth images, speed data, accelerometer and gyroscope coordinates...
-MADA can also be described as "agentic" because, although it has the components that correspond to an Agent 
-(sensors, memory, planner, actions; hence the name of the Driver Agent module), it is not yet as functional to really be considered a complete Agent.
+MADA can also be described as "agentic" because it has the components that correspond to an Agent (sensors, memory, 
+planner, actions; hence the name of the Driver Agent module), although it is not yet as functional to really be considered 
+a complete Agent.
 
 Regarding hardware, MADA is based on (and limited by) the following components I have at home:
 - Intel Realsense D435i camera (which captures RGB and depth images)
@@ -29,7 +36,10 @@ MADA is composed of several sensors and processing modules:
 objects (vehicles, people, traffic signs, traffic lights) and provides the object type, the bounding box and the position, 
 along with the mean distance from the camera
 - the **cell phone** gets the **speed** from the GPS, **recognizes driver speech requests**, gets the coordinates from the 
-**accelerometer** and **gyroscope**, and sends all this data to the computer. On the other hand, the cell phone **provides wi-fi** to the computer.
+**accelerometer** and **gyroscope**, and sends all this data to the computer.
+
+The communication between the sensors/processing modules and the events handler in the computer is implemented through websockets,
+which are enabled by the cell phone **wi-fi** shared connection.
 
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
 to be stored in the Memory and analyzed to assess if some action should be initiated.
@@ -68,8 +78,9 @@ the required time to process a frame in the Object Detector + Tracking is 40-60 
 could be acceptable for offline video: it wouldn't process in real-time, but you could record a video of the results 
 in even higher frame rates and play it back in real-time.
 
-However, since **MADA works in real-time**, I use the lowest frame rate, **6 fps**. With this rate, frame transition visual perception is 
-not smooth, but the available time to process a frame is 166 ms, which enables MADA to work in real-time.
+However, since **MADA works in real-time**, I use the lowest frame rate, **6 fps**. With this rate, the available time to 
+process a frame is 166 ms, which enables MADA to work in real-time; the drawback is that frame transition visual perception is 
+not smooth.
 
 ### Speed estimation 
 There are several MADA functionalities that leverage on the car speed. An example is checking the current speed 
@@ -77,7 +88,7 @@ against a speed limit sign and, in case current speed is greater, warn the drive
 
 The speed is periodically provided by a Kotlin app in the cell phone that takes it from the GPS.
 
-### Speech recognition (or Speech to Text)
+### Speech recognition (Speech to Text)
 The driver can interact with MADA through spoken requests, which are recognised and converted into text. 
 
 Speech recognition was initially performed in the Mac by running whisper.cpp in stream mode. 
@@ -89,7 +100,7 @@ The Driver Agent contains two modules: Memory and Planner
 
 **Memory**
 
-It enables the persistence of objects and events:
+It implements the persistence of objects and events:
 - MadaObject: this is the base class for all the types that can be detected by the object detector: vehicle, person, traffic light, traffic sign. 
 Defined by an object type and a track id (which remains in successive frames to uniquely identify the object instance)
 - SpaceEvent: attribute of a mada object instance. Defined by a bounding box, a position (left, front, right, 
@@ -179,18 +190,21 @@ and annotations, with separate types for red, green and yellow lights.
 
 ### Image annotation
 
-Since images from each of the datasets might have non-annotated instances of classes considered only in another dataset 
-(for instance, the images in the S2TLD dataset have only annotations of traffic lights, but there are also non-annotated 
-cars, crossing people and traffic signs), I had to review the whole dataset to add annotations (labels and bounding boxes) 
-for the non-annotated instances. The merging of images and annotations (and the additions) from different datasets was done 
-in the **Roboflow platform**.
+Since images from each of the datasets might have non-annotated instances of classes considered only in another dataset, 
+I had to review the whole dataset to add annotations (labels and bounding boxes) for the non-annotated instances. 
+For instance, next image's label file from the S2TLD dataset had only an annotation of a traffic light, thus I added annotations of a car,
+a no-entry sign and a speed limit sign.
+
+<img src="assets/example_additional_annotations.png" alt="Training results" width="800" height="550" />
+
+The merging of images and annotations from different datasets, and the addition of new annotations, was done in the **Roboflow platform**.
 
 **Speed limit signs and OCR**
 
 Initially, I considered each speed limit as a separate type; since it is difficult to get a balanced number images from all speed limits, 
 it was also difficult to make the YOLO model detect them properly: the confusion matrix showed there were frequent inter-speed limit errors. 
-Then I decided to merge all the speed limits into just one type and apply an OCR (Optical Craracter Recognition) to the bounding box image.
-The package I use is PaddleOCR.
+Then I decided to merge all the speed limits into just one type and apply an OCR (Optical Character Recognition) package 
+to the bounding box image. The OCR package I use is PaddleOCR.
 
 **Traffic lights transitions**
 
@@ -205,11 +219,33 @@ assigned by applying classic image processing techniques to the bounding box ima
 After the speed limits and traffic lights mergings, the resulting dataset is composed of **3160 training images** and 
 **750 validation images**, and the corresponding label files which totalize a **minimum of 200 annotations of 23 different image classes**.
 
-The dataset is available in https://universe.roboflow.com/alberto-julian-7z4dc/mada-driver-assistant-redu.
+The dataset is available at Roboflow Universe:
 
-(TODO) Imagen de las 23 classes (imagen y texto)
+https://universe.roboflow.com/alberto-julian-7z4dc/mada-driver-assistant-redu.
 
-(TODO) Training: Google Colab 2 hours, MAP, etc
+## Object Detector Training
+
+Once the images and annotations from the previous datasets have been compiled in the resulting dataset, and the additional 
+annotations have been defined, I used a jupyter notebook running on Google Colab to train the Object Detector. 
+After 20 epochs, the evolution of the mean Average Precision (50 and 50-95) is shown in next figure:
+
+<img src="assets/results_mAP.png" alt="Training results" width="450" height="300" />
+
+On the other hand, the normalized Confusion Matrix is shown in next figure:
+
+<img src="assets/confusion_matrix_normalized.png" alt="Confusion Matrix normalized" width="800" height="600" />
+
+From the last two figures, it can be observed that there is room for improvement; possible actions would be:
+- training more epochs
+- adding more examples of the most confused classes
+- yolo model hyperparameter tuning
+
+However, when I tested MADA in a real environment, the most common classes were properly detected in most cases, so I decided to terminate 
+the first training stage.
+
+Next image shows detection examples of the most common classes during a MADA tour:
+
+<img src="assets/detection_examples.png" alt="Training results" width="800" height="500" />
 
 ## Code structure
 The code is distributed in four folders:
@@ -225,12 +261,13 @@ python functions and classes in the object-detector and driver-agent folders.
 Contains two project folders for two Kotlin apps to be built in Android Studio and installed in an Android cell phone: 
 - **SpeedVoiceWebSocket**: gets the speed from the GPS and transforms the driver speech requests into text; then sends 
 that data as webSocket messages to the webSockets server in the computer. The Speed is provided by the **com.google.android.gms.location** 
-package, which interfaces with the GPS sensor. The driver speech is recognised and converted into text by the package **android.speech.SpeechRecognizer**.
+package, which gets the data from the GPS sensor. The driver speech is recognised and converted into text by the package **android.speech.SpeechRecognizer**.
 - **AccelGyroWebSocket**: gets the coordinates from the **accelerometer** and **gyroscope**, and sends them as webSockets 
 messages to the webSockets server in the computer. The Accelerometer and Gyroscope coordinates are provided by the **android.hardware.Sensor** package.
 
 ### object-detector
 Contains the following python files:
+- `2024-10-13_traffic_signals_Robo_yolov8.ipynb`: this is the notebook to train the yolo model with the resulting dataset
 - `object_detection_loop.py`: implements the object detection and tracking loop; in "live" mode it captures the RGB and Depth images 
 from the camera; otherwise, it takes them from recorded videos (I use them to test indoor changes in the object detector).
 - `object_detector.py`: it implements the object detector and tracker; it also applies OCR to the speed limit signs bounding boxes.
