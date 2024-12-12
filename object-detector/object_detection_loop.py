@@ -73,6 +73,8 @@ async def detect_and_track_objects():
 
                 space_event_messages = object_detector.detection_and_tracking(color_image, depth_image)
 
+                video_device.sleep_frame_resting_time()  # only makes sense in recorded video
+
                 for space_event_message in space_event_messages:
                     await websocket.send(space_event_message)
 

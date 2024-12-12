@@ -32,7 +32,7 @@ async def handle_events(websocket, path):
             elif message.split()[0] == "setSpeed":
                 print("Speed event received")
                 speed = int(message.split()[1])
-                if video_id_frame is not None:
+                if video_id_frame is not None:  # speed events are only recorded after video recording has started
                     print(f"speed {speed} at video_id & frame {video_id_frame}")
                     video_id, n_frame = video_id_frame.split("_")
                     speed_file = f"speed_{video_id}.txt"

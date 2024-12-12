@@ -2,8 +2,7 @@ import sys; sys.path.append("../common")
 from text_to_speech import text_to_speech
 import cv2
 import os
-from time import sleep
-import numpy as np
+from time import sleep, time
 
 class RecordedVideoManager:
 
@@ -23,8 +22,10 @@ class RecordedVideoManager:
 
         self.rgb_cap = cv2.VideoCapture(in_rgb_video_path)
 
-        fps = self.rgb_cap.get(cv2.CAP_PROP_FPS)
-        print("fps=", fps)
+        self.fps = self.rgb_cap.get(cv2.CAP_PROP_FPS)
+        print("fps (frames per second) =", self.fps)
+        self.spf = 1/self.fps  # second per frame
+
         self.image_width = int(self.rgb_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.image_height = int(self.rgb_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
@@ -58,16 +59,19 @@ class RecordedVideoManager:
                 speed_frame_lines = f.readlines()
             self.frame_speed = {int(speed_frame_line.split()[1]):int(speed_frame_line.split()[0])
                                 for speed_frame_line in speed_frame_lines}
-            print(self.frame_speed)
+            # print(self.frame_speed)
 
         self.n_frame = 0
+        self.n_frame_init_time = 0
         self.init_frame = recorded_video.get("init_frame", 0)
         self.sleep_time = recorded_video.get("sleep_time", 0)
 
-    def get_color_and_depth_images(self):
+    def get_color_and_depth_images(self, log=True):
 
         self.n_frame += 1
-        print(f"\n[FRAME] {self.n_frame}")
+        self.n_frame_init_time = time()
+        if log:
+            print(f"\n[FRAME] {self.n_frame}")
         if self.frame_speed is not None:
             self.speed = self.frame_speed.get(self.n_frame, None)
         else:
@@ -89,6 +93,17 @@ class RecordedVideoManager:
             skip_frame = False
 
         return skip_frame, color_image, depth_image
+
+    def sleep_frame_resting_time(self, log=False):
+        n_frame_end_time = time()
+        n_frame_time = n_frame_end_time - self.n_frame_init_time
+        n_frame_remaining_time = self.spf - n_frame_time
+        if log:
+            print(f"n_frame_time is {int(n_frame_time * 1000)}, n_frame_remaining_time is {int(n_frame_remaining_time * 1000)} ms")
+        if n_frame_remaining_time > 0:
+            sleep(n_frame_remaining_time)
+
+        return
 
     def stop(self):
 
