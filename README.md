@@ -133,7 +133,7 @@ mycroft_mimic3_tts, which is a bit slower than gtts.
 
 Next figure shows the Driver Agent structure with an example of use, an event action triggered by a detection of a speed limit sign.
 
-<img src="assets/driver_agent_speed_limit.png" alt="Driver Agent structure" width="800" height="450" />
+<img src="assets/driver_agent_speed_limit.png" alt="Driver Agent structure" width="800" height="400" />
 
 **A** Speed measurements are periodically collected from the GPS in the cell phone and sent to the server in the computer, 
 where they are stored as speed events in the Driver Agent’s Memory.
