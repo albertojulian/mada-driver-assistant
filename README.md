@@ -115,7 +115,7 @@ may be called to satisfy a driver request. LangGraph allows defining a graph to 
 entities: driver request, driver agent (which manages the access to the SLM), and tools. Next figure shows LangGraph-based 
 Driver Agent Graph.
 
-<img src="assets/driver_agent_langgraph.png" alt="Driver Agent Graph" width="300" height="350" />
+<img src="assets/driver_agent_langgraph.png" alt="Driver Agent Graph" width="250" height="275" />
 
 LangGraph's node `tools` enables accessing the functions from the SLM by just preceding them with a `@tool` decorator.
 There is also an implicit connection with the driver through the Speech-to-Text and Text-to-Speech modules.
