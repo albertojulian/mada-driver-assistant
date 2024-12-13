@@ -115,10 +115,11 @@ may be called to satisfy a driver request. LangGraph allows defining a graph to 
 entities: driver request, driver agent (which manages the access to the SLM), and tools. Next figure shows LangGraph-based 
 Driver Agent Graph.
 
-<img src="assets/driver_agent_langgraph.png" alt="Driver Agent Graph" width="200" height="200" />
+<img src="assets/driver_agent_langgraph.png" alt="Driver Agent Graph" width="300" height="350" />
 
 LangGraph's node `tools` enables accessing the functions from the SLM by just preceding them with a `@tool` decorator.
-The SLM currently used is Llama3.2:3b (the version with 3 billion parameters), which provides acceptable function-calling by default.
+There is also an implicit connection with the driver through the Speech-to-Text and Text-to-Speech modules.
+The SLM used is Llama3.2:3b (the version with 3 billion parameters), which provides acceptable function-calling by default.
 
 **Action types**
 
@@ -134,7 +135,7 @@ Text to Speech functionality is currently very simple:
 - a call to Google's gtts remote service, which takes a text and delivers an audio file of the spoken text. 
 In case of non-coverage, gtts does not work, and the TTS functionality request is rerouted to the local package 
 mycroft_mimic3_tts, which is a bit slower than gtts.
-- a call to macOS `afplay` command, which takes an audio file and plays it.
+- a call to FFMPEG `ffplay` command, which takes an audio file and plays it.
 
 ### Driver Agent Usage example: event driven action
 
