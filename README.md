@@ -95,7 +95,7 @@ However, the execution required 1 GB of RAM, thus I decided to implement speech 
 in the same Kotlin app as the speed estimation. It uses the built-in capabilities of the Android cell phone.
 
 ### Driver Agent
-The Driver Agent contains two modules: Memory and Planner
+The Driver Agent contains two modules: Memory and Driver Agent Graph
 
 **Memory**
 
@@ -172,7 +172,7 @@ as attribute of the MADA object, consisting of the detected class name, the trac
 where they are stored as speed events in the Driver Agent’s Memory.
 
 **C** The driver requests if the distance to the vehicle in front is safe; the request is recognized in the cell phone, 
-converted to text and sent to the SLM (Small Language Model) in the Driver Agent's Planner.
+converted to text and sent to the SLM (Small Language Model) in the Driver Agent Graph.
 
 **D** The SLM scans the functions available and identifies one that may satisfy the driver request: 
 `check_safety_distance_from_vehicle`.
@@ -296,17 +296,18 @@ Contains the following python files:
 - `driver_agent_events_handler.py`: implements the driver agent events handler through a webSockets server that receives 
 websocket messages from the processing modules (apps in the cell phone and object detector in the computer) and converts 
 them into events to be stored and processed
-- `driver_agent.py`: implements the DriverAgent class, which contains as attributes the Memory and Planner classes; 
-implements the Planner class, which manages the SLM that supports the **driver request initiated actions**; it also performs 
+- `driver_agent.py`: implements the DriverAgent class, which contains as attributes the Memory and Driver Agent Graph classes; 
+implements the LangGraph-based Driver Agent Graph class, which supports the **driver request initiated actions** by:
+  - getting the requests from the driver
+  - managing the SLM
+  - interfacing with the functions
+  - sending the response to the TTS module
 the evaluation of both automatic and request initiated actions
 - `memory.py`: contains all class definitions to support the persistence of base objects and events
 - `mada_classes.py`: implements all the classes (which inherit from the base class MadaObject) with the behaviour of 
 specific MADA types: vehicles, people, traffic signs, traffic lights
 - `functions.py`: includes the definition of the functions supporting the driver assistance actions
-- `functions_schema.py`: automatically generates function schemas by parsing the function definitions in `functions.py`. 
-The schemas are used by the SLM in the Driver Agent's Planner to decide if one of the existing functions must be called. 
-It also contains a FunctionParser class used by the Driver Agent's Planner to parse the JSON output of the SLM in function calling 
-mode and ensure the function exists and is correctly called
+
 
 ### common
 Contains python files used both by the object detector and the driver agent:
