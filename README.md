@@ -117,8 +117,9 @@ Driver Agent Graph.
 
 <img src="assets/driver_agent_langgraph.png" alt="Driver Agent Graph" width="250" height="275" />
 
-LangGraph's node `tools` enables accessing the functions from the SLM by just preceding them with a `@tool` decorator.
-There is also an implicit connection with the driver through the Speech-to-Text and Text-to-Speech modules.
+The `driver agent`node manages the interaction with the SLM: invokes it and processes the response.
+The `tools` node enables accessing the functions from the SLM by just preceding them with a `@tool` decorator.
+There is also an implicit connection between the driver and the `driver agent` node through the Speech-to-Text and Text-to-Speech modules.
 The SLM used is Llama3.2:3b (the version with 3 billion parameters), which provides acceptable function-calling by default.
 
 **Action types**
@@ -174,14 +175,17 @@ where they are stored as speed events in the Driver Agent’s Memory.
 converted to text and sent to the SLM (Small Language Model) in the Driver Agent's Planner.
 
 **D** The SLM scans the functions available and identifies one that may satisfy the driver request: 
-`check_safety_distance_from_vehicle`
+`check_safety_distance_from_vehicle`.
 
 **E** The function calls the function `get_vehicle_instance` to get the car's space event data (which includes the position 
 and the distance), the function `get_current_speed` and the function `get_safety_distance` (with current speed as parameter).
 
 **F** With the previous data, the function checks that the distance to the car in front is lower than the safety distance 
-at the current speed, and generates a text recommending the driver to reduce the speed. The text is sent to the TTS to be 
-converted to audio.
+at the current speed; this result is sent to the SLM in the `driver agent` node, which generates a text recommending the 
+driver to reduce the speed.
+
+**G** The SLM's gets the result from the function and, if the driver request is considered satisfied, generates a response 
+that is sent to the Text to Speech to be converted to audio.
 
 
 ## Datasets
