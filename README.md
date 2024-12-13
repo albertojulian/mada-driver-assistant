@@ -14,16 +14,15 @@ MADA warns with an audio message.
 Next video shows some MADA functionalities:
 
 <a href="https://www.youtube.com/watch?v=IBT4xY5QrCE">
-  <img src="assets/encabezamiento_MADA.png" alt="MADA functional blocks" width="900" height="500" />
+  <img src="assets/encabezamiento_MADA.png" alt="MADA image" width="900" height="500" />
 </a>
 
 **Why "multimodal" and "agentic"?**
 
-MADA is multimodal because it includes an SLM (Small Language Model) and is surrounded by speech input and output, 
+MADA is multimodal because it includes an SLM (Small Language Model) wrapped by speech input and output, 
 RGB and depth images, speed data, accelerometer and gyroscope coordinates...
 MADA can also be described as "agentic" because it has the components that correspond to an Agent (sensors, memory, 
-planner, actions; hence the name of the Driver Agent module), although it is not yet as functional to really be considered 
-a complete Agent.
+graph, actions; hence the name of the Driver Agent module), although it is still quite simple.
 
 Regarding hardware, MADA is based on (and limited by) the following components I have at home:
 - Intel Realsense D435i camera (which captures RGB and depth images)
@@ -39,7 +38,7 @@ along with the mean distance from the camera
 **accelerometer** and **gyroscope**, and sends all this data to the computer.
 
 The communication between the sensors/processing modules and the events handler in the computer is implemented through websockets,
-which are enabled by the cell phone **wi-fi** shared connection.
+which are enabled by the cell phone **wi-fi shared connection**.
 
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
 to be stored in the Memory and analyzed to assess if some action should be initiated.
@@ -108,11 +107,18 @@ depending on the center of the bounding box) and the distance to the camera
 - SpeedEvent: stores the speed measured by the GPS in the cell phone
 - ActionEvent: mainly used to avoid repeating the same action over the same object too soon 
 
-**Planner**
+**Driver Agent Graph**
 
-The Planner leverages on a Small Language Model powered with basic **function-calling**, which is the ability that 
-some LLMs and SLMs have to identify which function (from a given list) may be called to satisfy a driver request. 
-The SLM currently used is Gemma2, which provides acceptable function-calling by default.
+The Driver Agent Graph, implemented with the **LangGraph** framework, leverages on a **Small Language Model** powered with 
+**function-calling**, which is the ability that some LLMs and SLMs have to identify which function (from a given list) 
+may be called to satisfy a driver request. LangGraph allows defining a graph to control the flow between the different
+entities: driver request, driver agent (which manages the access to the SLM), and tools. Next figure shows LangGraph-based 
+Driver Agent Graph.
+
+<img src="assets/driver_agent_langgraph.png" alt="Driver Agent Graph" width="200" height="200" />
+
+LangGraph's node `tools` enables accessing the functions from the SLM by just preceding them with a `@tool` decorator.
+The SLM currently used is Llama3.2:3b (the version with 3 billion parameters), which provides acceptable function-calling by default.
 
 **Action types**
 
@@ -120,7 +126,8 @@ There are two types of actions:
 - **event driven actions**: respond to one or more events that correspond to some kind of risk or danger. 
 An example can be warning the driver that current speed is greater than that in a detected speed limit sign.
 - **driver request initiated actions**: respond to a speech request from the driver. An example could be checking if there is a 
-safety distance from a bus in front. Those requests are sent to an SLM in the Planner which can select a function to be called.
+safety distance from a bus in front. Those requests establish a session with the Driver Agent Graph, which can call one 
+or more functions to satisfy the request.
 
 ### Text to Speech
 Text to Speech functionality is currently very simple: 
@@ -133,7 +140,7 @@ mycroft_mimic3_tts, which is a bit slower than gtts.
 
 Next figure shows the Driver Agent structure with an example of use, an event action triggered by a detection of a speed limit sign.
 
-<img src="assets/driver_agent_speed_limit.png" alt="Driver Agent structure" width="800" height="400" />
+<img src="assets/driver_agent_speed_limit.png" alt="Example of Driver Agent event action" width="800" height="400" />
 
 **A** Speed measurements are periodically collected from the GPS in the cell phone and sent to the server in the computer, 
 where they are stored as speed events in the Driver Agent’s Memory.
@@ -150,7 +157,8 @@ the driver to reduce the speed. The text is sent to the TTS to be converted to a
 
 
 ### Driver Agent Usage example: driver request initiated action
-Next figure shows another example of use, a driver request initiated action.
+Next figure shows another example of use, a driver request initiated action, and includes interaction with LangGraph-based 
+Driver Agent Graph.
 
 <img src="assets/driver_agent_safety_distance.png" alt="Driver Agent structure" width="800" height="450" />
 
