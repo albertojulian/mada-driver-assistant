@@ -410,7 +410,7 @@ cd driver-agent; pip install -r requirements.txt
   - start the SpeedVoice (and AccelGyro) app
 
 # Future work
-- Fine-tune the SLM model to enable more specific and complex requests
+- Fine-tune the SLM model and modify LangGraph's Driver Agent graph to enable more specific and complex requests
 - Provide functionality for the Accelerometer and Gyroscope events
 - Add left and right back cameras to track blind spots, in order to enable detection of vehicles in those directions when trying to move to left or right lane
 
