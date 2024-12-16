@@ -8,7 +8,7 @@ communications :
     phone_connected : Android phone is connected  # DO NOT EDIT, MUST MATCH MESSAGE FROM PHONE
     phone_connected_start_object_detector : Android phone is connected to Driver Agent events handler. Start Object Detector loop.
     phone_connected_start_video_recorder : Android phone is connected to events recorder. Start Video Recorder.
-    listening_ack : Tell me  # acknowledge that the word "Listen" was recognised
+    listening_ack : Say 'exit' or 'quit' to finish session  # "Listen" was recognised, thus listen mode is ON and Driver Agent Graph starts
     object_detector_unknown_error : Object Detector or connection error; check if phone wi-fi is shared, Mac is connected to it and driver agent event handler is on
     video_recorder_unknown_error : Video Recorder or connection error; check if phone wi-fi is shared, Mac is connected to it and event recorder is on
 
@@ -23,10 +23,10 @@ camera :
 # In case live is False, the following parameters & values are used
 recorded_video :
     in_video_dir : ../../videos
-    in_rgb_video : rgb_0.mp4
+    in_rgb_video : rgb_2.mp4   # rgb_3.mp4 rgb_2.mp4  rgb_0.mp4
     # in_rgb_video : v01_20_traffic_light_all_colors.mp4  # rgb_5.mp4
     # in_rgb_video : v01_20_yellow_traffic_light.mp4
-    init_frame : 700    # rgb_5.mp4: 449, 1107 for give way, 800, 980 for speed limit, 1640 (green pequeño), 2052 (red), 2434 (red to green) traffic light
+    init_frame : 600
     sleep_time : 0    # how much time (s) a frame is displayed; debug purpose
 
 object_detection_model :
@@ -59,8 +59,10 @@ traffic_light :
         green_H_lower : 40
         green_H_upper : 90
 
-llm :
+driver_agent :
     llm_type : ollama  # mlx or ollama
     mlx_llm : mlx-community/gemma-2-2b-it-8bit
     # mlx_llm : mlx-community/gemma-2-2b-it-4bit
-    ollama_llm : gemma2:2b  # first run in terminal: "ollama run gemma2:2b"; then "/exit"
+    # ollama_llm : gemma2:2b  # first run in terminal: "ollama run gemma2:2b"; then "/exit"
+    ollama_llm : llama3.2:3b  # first run in terminal: "ollama run llama3.2:3b"; then "/exit"
+    tools : [check_safety_distance_from_vehicle_lg, get_current_speed_lg, get_safety_distance_lg, get_last_speed_limit_sign_lg]

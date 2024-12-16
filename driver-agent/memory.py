@@ -13,9 +13,8 @@ class Memory:
         self.speed_events = []
         self.accel_events = []
         self.gyro_events = []
-        self.text_input_messages = []
+        self.text_requests = []
         self.init_time = time()  # time reference for all events
-        self.listen_mode = False
         self.check_safe_distance = False
 
         print("\n<<<<<<<<<<<< Starting Memory >>>>>>>>>>>>")
@@ -84,7 +83,7 @@ class Memory:
         speed_event = SpeedEvent(speed, self.init_time)
         self.speed_events.append(speed_event)
         if log:
-            print(f"Creating speed = {speed} event")
+            print(f"***** Creating Speed event: {speed} km/h")
 
     def add_accel_event(self, accel_coords, log=False):
         if len(accel_coords) != 3:
@@ -97,7 +96,7 @@ class Memory:
         accel_event = AccelEvent(accel_coords, self.init_time)
         self.accel_events.append(accel_event)
         if log:
-            print(f"Creating accel event")
+            print(f"**** Creating accel event")
 
     def add_gyro_event(self, gyro_coords, log=False):
         if len(gyro_coords) != 3:
@@ -110,7 +109,7 @@ class Memory:
         gyro_event = GyroEvent(gyro_coords, self.init_time)
         self.gyro_events.append(gyro_event)
         if log:
-            print(f"Creating gyro event")
+            print(f"**** Creating gyro event")
 
         umbral = 0.1
         message = ""
@@ -122,28 +121,22 @@ class Memory:
 
         text_to_speech_async(message)
 
-    def add_text_input_message(self, text_input_message, log=False):
-        text_input_message_event = SpeechToTextEvent(text_input_message, self.init_time)
-        self.text_input_messages.append(text_input_message_event)
+    def add_text_request(self, text_request, log=False):
+        text_request_event = SpeechToTextEvent(text_request, self.init_time)
+        self.text_requests.append(text_request_event)
         if log:
-            print(f"Creating input message event: {text_input_message}")
+            print(f"***** Creating text request event: {text_request}")
 
-        return text_input_message_event
-
-    """
-    def add_action_event(self, params, output_message, log=False):
-        object, is_new_object = self.get_object(params, log=log)
-        object.add_action_event(params, output_message, log=log)
-    """
+        return text_request_event
 
     def print_content(self, extended_log=False):
 
-        print(f"\nMemory contains:")
+        print(f"Memory contains:")
         print(f"- {len(self.mada_objects_list)} objects")
         print(f"- {len(self.speed_events)} speed events")
         print(f"- {len(self.accel_events)} accelerometer events")
         print(f"- {len(self.gyro_events)} gyroscope events")
-        print(f"- {len(self.text_input_messages)} text input messages\n")
+        print(f"- {len(self.text_requests)} text input messages\n")
 
         if extended_log:
             for mada_object in self.mada_objects_list:
@@ -155,8 +148,8 @@ class Memory:
                 event_time = round(speed_event.creation_time, 1)
                 print(f'Speed of {speed_event.speed} km/h at time {event_time}')
 
-            for text_input_message in self.text_input_messages:
-                print(f"Received input message: {text_input_message}")
+            for text_request in self.text_requests:
+                print(f"Received input message: {text_request}")
 
 
 # from class name "traffic light" to class ref "TrafficLight" (camel case)
@@ -287,9 +280,9 @@ class ActionEvent(Event):
 
 
 class SpeechToTextEvent(Event):
-    def __init__(self, text_input_message, init_time):
+    def __init__(self, text_request, init_time):
         super().__init__(init_time)
-        self.text_input_message = text_input_message
+        self.text_request = text_request
         self.processing_time = 0
 
 

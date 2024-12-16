@@ -1,13 +1,16 @@
 gTTS==2.5.1
-huggingface-hub==0.25.0
-# librosa==0.10.2.post1  # modifies audio speed without modifying frequency
+# huggingface-hub==0.25.0
+langchain
+# langchain_community-0.3.7  # for MLXPipeline
+langchain-ollama
+langgraph
 mlx==0.17.3
-mlx-lm==0.18.2
+mlx-lm==0.19.3  # 0.18.2
 mycroft_mimic3_tts==0.2.4
-ollama==0.3.3
+# ollama==0.3.3
 pdfminer.six==20231228
 pydub==0.25.1
 pyrubberband==0.4.0  # modifies audio speed without modifying frequency; better than librosa
 sounddevice==0.5.1
-transformers==4.44.2
+# transformers==4.44.2
 websockets==11.0.3

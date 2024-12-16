@@ -1,6 +1,7 @@
 from gtts import gTTS, tts as gtts
 import subprocess
 import os
+import platform
 from time import time, sleep
 import sounddevice as sd
 import io
@@ -11,19 +12,34 @@ from pyrubberband import pyrb
 # pip install mycroft-mimic3-tts[all]  # Removing [all] will install support for English only.
 
 def text_to_speech_async(output_message):
-
     audio_thread = threading.Thread(target=text_to_speech, args=(output_message,))
     # Start audio in a separate thread
     audio_thread.start()
 
 
-def text_to_speech_afplay(message, audio_speed=1.75, print_message=True, audio_file="tts_out.mp3"):
+def text_to_speech(message, audio_speed=1.75, print_message=True, disable_audio=False, lang='en'):
+
+    # sd._terminate()  # Reset PortAudio
+    # sd._initialize()  # Reinitialize
+
 
     if print_message:
         print("\n<<<<<<<<<<< Printing audio message >>>>>>>>>>>>>>")
-        print(f"{message}\n")
+        print(message)
 
-    # Create the gTTS object with the message
+    # audio is disabled when driver agent is in listen mode to avoid mixing driver speech with audio automatic notifications
+    if disable_audio:
+        return
+
+    if platform.system() == "Darwin":
+        text_to_speech_mac(message, audio_speed)
+        # text_to_speech_not_mac(message, audio_speed)  # a bit less quality, but crashes less
+    else:
+        text_to_speech_not_mac(message, audio_speed)
+
+def text_to_speech_mac(message, audio_speed=1.75, audio_file="tts_out.mp3"):
+
+   # Create the gTTS object with the message
     # tts = gTTS(message, lang='es')
     tts = gTTS(message, lang='en')
 
@@ -45,7 +61,7 @@ def text_to_speech_afplay(message, audio_speed=1.75, print_message=True, audio_f
         audiofile_to_speech(audio_wav_file, audio_speed)
 
 
-def text_to_audiofile(message, audio_speed=1.5, audio_wav_file="tts_out.wav"):  # mimic3
+def text_to_audiofile(message, audio_wav_file="tts_out.wav"):  # mimic3
     # mimic3 --voice <voice> "<text>" > output.wav
 
     subprocess.run(f"mimic3 '{message}' > {audio_wav_file}", shell=True)
@@ -60,24 +76,15 @@ def audiofile_to_speech(audio_file, audio_speed=1.75):
     # os.system(f"afplay {audio_file} -r {audio_speed}")
 
     if os.path.exists(audio_file):
-        subprocess.run(f"afplay {audio_file} -r {audio_speed}", shell=True)
+        # subprocess.run(f"afplay {audio_file} -r {audio_speed} -d", shell=True)
+        subprocess.run(
+            f"ffplay -nodisp -loglevel quiet -i {audio_file} -af 'atempo={audio_speed}' -autoexit",
+            shell=True)
     else:
         print(f"Cannot find file {audio_file}")
 
 
-def check_tts():
-
-    while True:
-        message = "testing TTS"
-        text_to_speech(message)
-        sleep(3)
-
-
-def text_to_speech(message, audio_speed=1.75, print_message=True, lang='en'):
-
-    if print_message:
-        print("\n<<<<<<<<<<< Printing audio message >>>>>>>>>>>>>>")
-        print(message)
+def text_to_speech_not_mac(message, audio_speed=1.75, lang='en'):
 
     audio_data = gtts_tts(message, lang)
 
@@ -87,7 +94,11 @@ def text_to_speech(message, audio_speed=1.75, print_message=True, lang='en'):
 
     if audio_data:
         audio_data = change_audio_speed(audio_data, audio_speed)
-        play_audio(audio_data)
+        try:
+            play_audio(audio_data)
+        except Exception as e:
+            print(f"Audio playback failed: {e}")
+
     else:
         print("No se pudo generar el audio con ninguna opción")
 
@@ -125,7 +136,7 @@ def mimic3_tts(message):
 def change_audio_speed(audio_data, speed=1.75, librosa_stretch=True):
     # Cargar el audio desde el flujo de bytes
     audio_data.seek(0)
-    data, sample_rate = sf.read(audio_data)
+    data, sample_rate = sf.read(audio_data)  # 24000
 
     # Ajustar la velocidad sin cambiar el tono
     data_stretched = pyrb.time_stretch(data, sample_rate, rate=speed, rbargs=None)
@@ -140,9 +151,21 @@ def change_audio_speed(audio_data, speed=1.75, librosa_stretch=True):
 def play_audio(audio_data):
     with sf.SoundFile(audio_data) as sf_file:
         audio_array = sf_file.read(dtype="int16")
-        sample_rate = sf_file.samplerate
-        sd.play(audio_array, samplerate=sample_rate)
-        sd.wait()
+        sample_rate = sf_file.samplerate  # 24000
+
+        try:
+            sd.play(audio_array, samplerate=sample_rate)
+            sd.wait()  # Wait until playback is finished
+        except Exception as e:
+            print(f"Audio playback failed: {e}")
+
+
+def check_tts():
+
+    while True:
+        message = "testing TTS"
+        text_to_speech(message)
+        sleep(3)
 
 
 def main1():
@@ -160,11 +183,25 @@ def main1():
 
 def main2():
     message = "Speed limit is 50 km/h"
-    text_to_speech_afplay(message)
-    text_to_speech(message)
+    text_to_speech_not_mac(message)
+    text_to_speech_mac(message)
+
+
+def main3():
+    import sounddevice as sd
+    print(sd.query_devices())
+
+    """
+      0 LS32A70, Core Audio (0 in, 2 out)
+    > 1 MacBook Pro (micrófono), Core Audio (1 in, 0 out)
+    < 2 MacBook Pro (altavoces), Core Audio (0 in, 2 out)
+      3 Microsoft Teams Audio, Core Audio (1 in, 1 out)
+      4 ZoomAudioDevice, Core Audio (2 in, 2 out)
+    """
 
 if __name__ == "__main__":
 
     # check_tts()
     # main1()
     main2()
+    # main3()

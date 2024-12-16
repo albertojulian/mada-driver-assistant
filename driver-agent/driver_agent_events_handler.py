@@ -1,6 +1,3 @@
-# La app móvil informa la velocidad cada x segundos
-
-# instalo websockets por PyCharm (equivale a pip install websockets)
 import asyncio
 import websockets
 import subprocess
@@ -32,20 +29,24 @@ async def handle_events(websocket, path):
             elif message.split()[0] == "setInputMessage":
                 text_input_message = " ".join(message.split()[1:])
                 if text_input_message == "listen":
-                    driver_agent.memory.listen_mode = True
-                    text_to_speech(listening_ack, print_message=False)
-
-                # elif input_message == "stop":
-                #     driver_agent.memory.listen_mode = False  # enables proactive actions
-
+                    if driver_agent.listen_mode is False:
+                        driver_agent.listen_mode = True  # disables automatic audio notifications
+                        print("\n<<<<<<<< Starting speech session. Disabling automatic audio notifications <<<<<<<<<\n")
+                        driver_agent.start_driver_agent_graph()
+                elif text_input_message in ("quit", "exit"):
+                    if driver_agent.listen_mode is True:
+                        driver_agent.listen_mode = False  # enables automatic audio notifications
+                        print("\n>>>>>>>> Ending speech session. Enabling automatic audio notifications again >>>>>>>>>>>>>>>>\n")
+                        driver_agent.remove_driver_agent_graph()
                 else:
-                    if driver_agent.memory.listen_mode is True:
+                    if driver_agent.listen_mode is True:  # avoids sending unwanted speech to the driver agent
+                        print(f"***** Text request event: {text_input_message}")
                         driver_agent.evaluate_action_from_request(text_input_message)
-                        driver_agent.memory.listen_mode = False  # enables proactive actions
 
             elif message.split()[0] == "setSpeed":
                 speed = int(message.split()[1])
                 driver_agent.memory.add_speed_event(speed, log=log)
+                print(f"***** Speed event: {speed} km/h")
 
             elif message.split()[0] == "setAccel":
                 accel_coords = message.split()[1].split(";")
@@ -59,7 +60,6 @@ async def handle_events(websocket, path):
             duration = current_time - init_time
             interval = round(duration % 5, 1)  # print memory content every 5 seconds
             if interval == 0.0:
-                # memory_reading_test()
                 driver_agent.memory.print_content()
 
     except websockets.exceptions.ConnectionClosedError as e:
@@ -71,7 +71,6 @@ async def handle_events(websocket, path):
 
 if __name__ == "__main__":
 
-    # main1()
     mada_file = "../mada.yaml"
     with open(mada_file) as file:
         mada_config_dict = yaml.load(file, Loader=yaml.SafeLoader)
@@ -87,12 +86,12 @@ if __name__ == "__main__":
     phone_connected = communications.get("phone_connected", "Android phone is connected")
     phone_connected_start_object_detector = communications.get("phone_connected_start_object_detector",
                                                                  "Start object detector")
-    listening_ack = communications.get("listening_ack", "I am listening")
+    # listening_ack = communications.get("listening_ack", "I am listening")
 
     status_ok = check_mac_wifi_connection()
 
     if status_ok:
-        print("\n<<<<<<<<<<<< Starting Driver Agent Events Handler >>>>>>>>>>>>\n")
+        print("<<<<<<<<<<<< Starting Driver Agent Events Handler >>>>>>>>>>>>\n")
 
         ws_port = communications["ws_port"]
         start_server = websockets.serve(handle_events, "0.0.0.0", ws_port)  # port to listen websockets

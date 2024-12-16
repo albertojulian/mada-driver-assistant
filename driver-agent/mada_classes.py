@@ -1,4 +1,5 @@
 from memory import MadaObject, get_memory
+from driver_agent import get_driver_agent
 import yaml
 from functions import check_safety_distance_from_vehicle, get_current_speed
 import sys; sys.path.append("../common")
@@ -13,29 +14,7 @@ with open(mada_file) as file:
 # time between actions: avoids redundant actions about the same object
 TIME_BETWEEN_ACTIONS = mada_config_dict.get("time_between_actions", 2)
 
-
-class Bicycle(MadaObject):
-
-    def manage_space_event(self, params, log=False):
-        # call MadaObject manage_space_event method
-        space_event = super().manage_space_event(params, log)
-        object_position = space_event.object_position
-
-        time_since_last_action = self.time_since_last_action()
-
-        if log:
-            print(f"time_since_last_action {time_since_last_action}")
-
-        # if last action was more than x seconds ago, perform action
-        if time_since_last_action > TIME_BETWEEN_ACTIONS:
-            if object_position == "in front":
-                too_close, output_message = check_safety_distance_from_vehicle(vehicle=self, space_event=space_event,
-                                                                               report_always=False)
-                if too_close:
-                    self.add_action_event(params, output_message)
-
-
-class Bus(MadaObject):
+class Vehicle(MadaObject):
 
     def manage_space_event(self, params, log=False):
         # call MadaObject manage_space_event method
@@ -56,25 +35,24 @@ class Bus(MadaObject):
                     self.add_action_event(params, output_message)
 
 
-class Car(MadaObject):
+class Bicycle(Vehicle):
+    pass
 
-    def manage_space_event(self, params, log=False):
-        # call MadaObject manage_space_event method
-        space_event = super().manage_space_event(params, log)
-        object_position = space_event.object_position
 
-        time_since_last_action = self.time_since_last_action()
+class Bus(Vehicle):
+    pass
 
-        if log:
-            print(f"time_since_last_action {time_since_last_action}")
 
-        # if last action was more than x seconds ago, perform action
-        if time_since_last_action > TIME_BETWEEN_ACTIONS:
-            if object_position == "in front":
-                too_close, output_message = check_safety_distance_from_vehicle(vehicle=self, space_event=space_event,
-                                                                               report_always=False)
-                if too_close:
-                    self.add_action_event(params, output_message)
+class Car(Vehicle):
+    pass
+
+
+class Motorcycle(Vehicle):
+    pass
+
+
+class Truck(Vehicle):
+    pass
 
 
 class Construction(MadaObject):
@@ -165,27 +143,6 @@ class GoRight(MadaObject):
             self.add_action_event(params, output_message)
 
             space_event2tts(output_message)
-
-
-class Motorcycle(MadaObject):
-
-    def manage_space_event(self, params, log=False):
-        # call MadaObject manage_space_event method
-        space_event = super().manage_space_event(params, log)
-        object_position = space_event.object_position
-
-        time_since_last_action = self.time_since_last_action()
-
-        if log:
-            print(f"time_since_last_action {time_since_last_action}")
-
-        # if last action was more than x seconds ago, perform action
-        if time_since_last_action > TIME_BETWEEN_ACTIONS:
-            if object_position == "in front":
-                too_close, output_message = check_safety_distance_from_vehicle(vehicle=self, space_event=space_event,
-                                                                               report_always=False)
-                if too_close:
-                    self.add_action_event(params, output_message)
 
 
 class NoEntry(MadaObject):
@@ -290,7 +247,8 @@ class Person(MadaObject):
 
         # if last action was more than x seconds ago, perform action
         if time_since_last_action > TIME_BETWEEN_ACTIONS:
-            max_distance = mada_config_dict.get("max_distance_from_camera", 6)
+            camera_conf = mada_config_dict["camera"]
+            max_distance = camera_conf.get("max_distance_from_camera", 6)
             if object_distance > max_distance:
                 output_message = f"{self.class_name} {object_position} is more than {max_distance} meters away."
             else:
@@ -430,30 +388,8 @@ class TrafficLight(MadaObject):
         self.traffic_light_colors.append(traffic_light_color)
 
 
-class Truck(MadaObject):
-
-    def manage_space_event(self, params, log=False):
-        # call MadaObject manage_space_event method
-        space_event = super().manage_space_event(params, log)
-        object_position = space_event.object_position
-
-        time_since_last_action = self.time_since_last_action()
-
-        if log:
-            print(f"time_since_last_action {time_since_last_action}")
-
-        # if last action was more than x seconds ago, perform action
-        if time_since_last_action > TIME_BETWEEN_ACTIONS:
-            if object_position == "in front":
-                too_close, output_message = check_safety_distance_from_vehicle(vehicle=self, space_event=space_event,
-                                                                               report_always=False)
-                if too_close:
-                    self.add_action_event(params, output_message)
-
-
 def space_event2tts(output_message):
-    memory = get_memory()
-    if memory.listen_mode is False:
-
-        text_to_speech(output_message)
-
+    driver_agent = get_driver_agent()
+    disable_audio = driver_agent.listen_mode
+    # audio is disabled when driver agent is in listen mode to avoid mixing driver speech with audio automatic notifications
+    text_to_speech(output_message, disable_audio=disable_audio)
