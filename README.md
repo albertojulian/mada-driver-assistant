@@ -39,7 +39,7 @@ which are enabled by the cell phone **wi-fi shared connection**.
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
 to be stored in the Memory and analyzed to assess if some action should be initiated.
 
-Next figure shows main MADA parts; **click on it to see a video with an overview of the parts**.
+Next figure shows main MADA parts; **right-click on it to see a video with an overview of the parts**.
 
 <a href="https://youtu.be/MyH8uIKLaWQ">
   <img src="assets/esquema_MADA.png" alt="MADA functional blocks" width="900" height="500" />
@@ -147,7 +147,7 @@ From the last two figures, it can be observed that there is room for improvement
 However, when I tested MADA in a real environment, the most common classes were properly detected in most cases, so I decided to terminate 
 the first training stage.
 
-Next image shows detection examples screenshot of the most common classes during MADA sessions. **Click on it to see a video with 
+Next image shows detection examples screenshot of the most common classes during MADA sessions. **Right-click on it to see a video with 
 detections in MADA sessions**.
 
 <a href="https://youtu.be/cGTohjPXr_o">
@@ -194,7 +194,7 @@ or more functions to satisfy the request.
 ### Driver Agent Usage example: event driven action
 
 Next figure shows the Driver Agent structure with an example of use, an event action triggered by a detection of a speed limit sign. 
-**Click on it to see a video with details and an example in a MADA session**:
+**Right-click on it to see a video with details and an example in a MADA session**:
 
 <a href="https://youtu.be/_KBin7kKwdM">
   <img src="assets/driver_agent_speed_limit.png" alt="Example of Driver Agent event action" width="800" height="400" />
@@ -216,7 +216,7 @@ the driver to reduce the speed. The text is sent to the TTS to be converted to a
 ### Driver Agent Usage example: driver request initiated action
 Next figure shows another example of use, a driver request initiated action, and includes interaction with LangGraph-based 
 Driver Agent Graph.
-**Click on it to see a video with details and examples in two MADA sessions**:
+**Right-click on it to see a video with details and examples in two MADA sessions**:
 
 <a href="https://youtu.be/C4Y2hk0Xijw">
   <img src="assets/driver_agent_safety_distance.png" alt="Driver Agent structure" width="800" height="450" />
