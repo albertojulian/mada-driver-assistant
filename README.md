@@ -1,5 +1,7 @@
 # Basic Multimodal Agentic Driver Assistant (MADA)
 
+<img src="assets/encabezamiento_MADA.png" alt="MADA image" width="900" height="500" />
+
 MADA project's goal is having a minimum, but as functional as possible, **driver assistant** that works outdoor in real-time. 
 The approach is non-invasive: the only outputs are speech audio warnings or suggestions; there is no intention to take 
 control of the car, just to assist the driver with audio messages.
@@ -10,12 +12,6 @@ for the current speed, MADA warns with an audio message.
 - **speed assistance**: When a speed limit traffic sign is detected, and the estimated speed is greater than the speed limit, 
 MADA warns with an audio message.
 - **traffic light warning**: When a traffic light is detected, depending on the current color and the transition, it warns the driver.
-
-Next video shows some MADA functionalities:
-
-<a href="https://www.youtube.com/watch?v=IBT4xY5QrCE">
-  <img src="assets/encabezamiento_MADA.png" alt="MADA image" width="900" height="500" />
-</a>
 
 **Why "multimodal" and "agentic"?**
 
@@ -43,9 +39,11 @@ which are enabled by the cell phone **wi-fi shared connection**.
 All the data at the output of the processing modules are sent to the **Driver Agent**, which converts them into events 
 to be stored in the Memory and analyzed to assess if some action should be initiated.
 
-Next figure shows main MADA blocks.
+Next figure shows main MADA parts; **click on it to see a video with an overview of the parts**.
 
-<img src="assets/esquema_MADA.png" alt="MADA functional blocks" width="900" height="500" />
+<a href="https://youtu.be/MyH8uIKLaWQ">
+  <img src="assets/esquema_MADA.png" alt="MADA functional blocks" width="900" height="500" />
+</a>
 
 # Object Detector
 The goal of an Object Detection model is to analyze an image and identify which object types, out of a given list, 
@@ -149,9 +147,12 @@ From the last two figures, it can be observed that there is room for improvement
 However, when I tested MADA in a real environment, the most common classes were properly detected in most cases, so I decided to terminate 
 the first training stage.
 
-Next image shows detection examples of the most common classes during a MADA tour:
+Next image shows detection examples screenshot of the most common classes during MADA sessions. **Click on it to see a video with 
+detections in MADA sessions**.
 
-<img src="assets/detection_examples.png" alt="Training results" width="800" height="500" />
+<a href="https://youtu.be/cGTohjPXr_o">
+  <img src="assets/detection_examples.png" alt="Training results" width="800" height="500" />
+</a>
 
 # Driver Agent
 The Driver Agent contains two modules: Memory and Driver Agent Graph
@@ -192,9 +193,12 @@ or more functions to satisfy the request.
 
 ### Driver Agent Usage example: event driven action
 
-Next figure shows the Driver Agent structure with an example of use, an event action triggered by a detection of a speed limit sign.
+Next figure shows the Driver Agent structure with an example of use, an event action triggered by a detection of a speed limit sign. 
+**Click on it to see a video with details and an example in a MADA session**:
 
-<img src="assets/driver_agent_speed_limit.png" alt="Example of Driver Agent event action" width="800" height="400" />
+<a href="https://youtu.be/_KBin7kKwdM">
+  <img src="assets/driver_agent_speed_limit.png" alt="Example of Driver Agent event action" width="800" height="400" />
+</a>
 
 **A** Speed measurements are periodically collected from the GPS in the cell phone and sent to the server in the computer, 
 where they are stored as speed events in the Driver Agent’s Memory.
@@ -212,8 +216,11 @@ the driver to reduce the speed. The text is sent to the TTS to be converted to a
 ### Driver Agent Usage example: driver request initiated action
 Next figure shows another example of use, a driver request initiated action, and includes interaction with LangGraph-based 
 Driver Agent Graph.
+**Click on it to see a video with details and examples in two MADA sessions**:
 
-<img src="assets/driver_agent_safety_distance.png" alt="Driver Agent structure" width="800" height="450" />
+<a href="https://youtu.be/C4Y2hk0Xijw">
+  <img src="assets/driver_agent_safety_distance.png" alt="Driver Agent structure" width="800" height="450" />
+</a>
 
 **A** The Object Detector scans RGB images at a given frame rate from the camera in order to detect MADA objects:
 people, vehicles, traffic signs, traffic lights. When a MADA object is detected and tracked, a Space event is generated
