@@ -218,7 +218,7 @@ Next figure shows another example of use, a driver request initiated action, and
 Driver Agent Graph.
 **Right-click on it to see a video with details and examples in two MADA sessions**:
 
-<a href="https://youtu.be/C4Y2hk0Xijw">
+<a href="https://youtu.be/l96t_S6UuUE">
   <img src="assets/driver_agent_safety_distance.png" alt="Driver Agent structure" width="800" height="450" />
 </a>
 
